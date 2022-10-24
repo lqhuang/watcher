@@ -3,3 +3,15 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# common IDEs to be ignored
+.idea/
+.metals/
+.vscode/
+
+# build tool specific entries
+.bloop
+target
+metals.sbt
+project/project
+.bsp/
