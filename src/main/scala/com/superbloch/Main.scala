@@ -21,7 +21,9 @@ object Main extends IOApp:
       .resource
       .use { server =>
         IO.blocking {
-          println(s"Go to http://localhost:${server.address.getPort}/docs to open SwaggerUI. Press ENTER key to exit.")
+          println(
+            s"Go to http://localhost:${server.address.getPort}/docs to open SwaggerUI. Press ENTER key to exit."
+          )
           StdIn.readLine()
         }
       }
