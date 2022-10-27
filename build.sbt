@@ -8,10 +8,10 @@ scalacOptions ++= Seq(
   "-explain", // Explain errors in more detail.
   "-feature", // Emit warning and location for usages of features that should be imported explicitly.
   "-unchecked", // Enable additional warnings where generated code depends on assumptions.
-  "-Xcheckinit", // Wrap field accessors to throw an exception on uninitialized access.
   "-Yexplicit-nulls",
-  "-Ywarn-dead-code", // Warn when dead code is identified.
-  "-Ywarn-extra-implicit", // Warn when more than one implicit parameter section is defined.
+  // "-Xcheckinit", // Wrap field accessors to throw an exception on uninitialized access.
+  // "-Ywarn-dead-code", // Warn when dead code is identified.
+  // "-Ywarn-extra-implicit", // Warn when more than one implicit parameter section is defined.
 )
 
 lazy val rootProject = (project in file(".")).settings(
@@ -21,9 +21,10 @@ lazy val rootProject = (project in file(".")).settings(
     organization := "com.superbloch",
     scalaVersion := "3.2.0",
     libraryDependencies ++= Seq(
-      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % tapirVersion,
       "org.http4s"                  %% "http4s-blaze-server"     % blazeVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % tapirVersion,
       "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-asyncapi-docs"     % tapirVersion,
       "com.softwaremill.sttp.tapir" %% "tapir-jsoniter-scala"    % tapirVersion,
       "com.github.plokhotnyuk.jsoniter-scala" %% "jsoniter-scala-core" % jsoniterVersion,
       "com.github.plokhotnyuk.jsoniter-scala" %% "jsoniter-scala-macros" % jsoniterVersion,
