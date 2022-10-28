@@ -1,5 +1,6 @@
+val http4sVersion   = "0.23.12"
+val blazeVersion    = http4sVersion
 val tapirVersion    = "1.1.3"
-val blazeVersion    = "0.23.12"
 val jsoniterVersion = "2.17.5"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
@@ -21,8 +22,9 @@ lazy val rootProject = (project in file(".")).settings(
     organization := "com.superbloch",
     scalaVersion := "3.2.0",
     libraryDependencies ++= Seq(
-      "org.http4s"                  %% "http4s-blaze-server"     % blazeVersion,
-      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % tapirVersion,
+      "org.http4s"                  %% "http4s-dsl"          % http4sVersion,
+      "org.http4s"                  %% "http4s-blaze-server" % blazeVersion,
+      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,
       "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
       "com.softwaremill.sttp.tapir" %% "tapir-asyncapi-docs"     % tapirVersion,
       "com.softwaremill.sttp.tapir" %% "tapir-jsoniter-scala"    % tapirVersion,

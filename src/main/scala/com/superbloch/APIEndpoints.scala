@@ -36,11 +36,11 @@ object APIEndpoints {
   //   booksListing.serverLogicSuccess(_ => IO.pure(Library.books))
 
   val apiV1SrvEndpoints = List(indexServerEndpoint)
-  val apiV1Endpoints =
-    apiV1SrvEndpoints.map(_.endpoint).map(_.prependIn(apiV1Prefix))
   val apiV1Routes =
     Http4sServerInterpreter[IO]().toRoutes(apiV1SrvEndpoints)
 
+  val apiV1DocsEndpoints =
+    apiV1SrvEndpoints.map(_.endpoint).map(_.prependIn(apiV1Prefix))
 }
 
 // object Library:

@@ -9,10 +9,10 @@ import sttp.tapir.swagger.bundle.SwaggerInterpreter
 object DocsEndpoints {
   val asyncDocs =
     AsyncAPIInterpreter()
-      .toAsyncAPI(WSEndpoints.wsSrvEndpoint, "Watcher Reactive API", "0.1.0")
+      .toAsyncAPI(WSEndpoints.wsV1DocEndpoint, "Watcher Reactive API", "0.1.0")
 
   val docsSrvEndpoints = SwaggerInterpreter().fromEndpoints[IO](
-    APIEndpoints.apiV1Endpoints,
+    APIEndpoints.apiV1DocsEndpoints,
     "Watcher REST API",
     "0.1.0"
   )

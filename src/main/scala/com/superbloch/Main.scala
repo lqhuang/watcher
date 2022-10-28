@@ -10,6 +10,8 @@ import WSEndpoints.wsRoute
 import APIEndpoints.apiV1Routes
 import DocsEndpoints.docsRoutes
 
+import BlazeWS.routes
+
 object Main extends IOApp:
 
   override def run(args: List[String]): IO[ExitCode] =
@@ -20,9 +22,10 @@ object Main extends IOApp:
       .bindHttp(port, "0.0.0.0")
       .withHttpWebSocketApp(wsb =>
         Router(
-          "/api/v1" -> apiV1Routes,
-          "/ws/v1"  -> wsRoute(wsb),
-          "/"       -> docsRoutes,
+          "/api/v1"  -> apiV1Routes,
+          "/ws/v1"   -> wsRoute(wsb),
+          "/ws/test" -> routes[IO](wsb),
+          "/"        -> docsRoutes,
         ).orNotFound
       )
       .resource
