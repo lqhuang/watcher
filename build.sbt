@@ -15,6 +15,12 @@ scalacOptions ++= Seq(
   // "-Ywarn-extra-implicit", // Warn when more than one implicit parameter section is defined.
 )
 
+inThisBuild(
+  Seq(
+    semanticdbEnabled := true, // enable SemanticDB
+  )
+)
+
 lazy val rootProject = (project in file(".")).settings(
   Seq(
     name         := "watcher",
