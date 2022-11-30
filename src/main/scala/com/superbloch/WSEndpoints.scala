@@ -1,4 +1,4 @@
-package com.superbloch
+package com.superbloch.watcher
 
 import scala.concurrent.duration.*
 
@@ -21,10 +21,8 @@ object WSEndpoints {
           String,
           CodecFormat.TextPlain,
           String,
-          CodecFormat.TextPlain
-        ](
-          Fs2Streams[IO]
-        )
+          CodecFormat.TextPlain,
+        ](Fs2Streams[IO])
       )
 
   val broadcastToConnected: IO[Stream[IO, String] => Stream[IO, String]] =

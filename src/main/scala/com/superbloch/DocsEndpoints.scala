@@ -1,4 +1,4 @@
-package com.superbloch
+package com.superbloch.watcher
 
 import cats.effect.IO
 import sttp.tapir.docs.asyncapi.AsyncAPIInterpreter

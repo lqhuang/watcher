@@ -1,16 +1,17 @@
-package com.superbloch
+package com.superbloch.watcher
 
 import scala.io.StdIn
 
-import cats.effect.{ExitCode, IO, IOApp}
+import cats.effect.{Async, ExitCode, IO, IOApp}
+
+import fs2.Stream
+
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.Router
 
 import WSEndpoints.wsRoute
 import APIEndpoints.apiV1Routes
 import DocsEndpoints.docsRoutes
-
-import BlazeWS.routes
 
 object Main extends IOApp:
 
@@ -24,7 +25,7 @@ object Main extends IOApp:
         Router(
           "/api/v1"  -> apiV1Routes,
           "/ws/v1"   -> wsRoute(wsb),
-          "/ws/test" -> routes[IO](wsb),
+          "/ws/test" -> BlazeWS[IO].routes(wsb),
           "/"        -> docsRoutes,
         ).orNotFound
       )
@@ -38,3 +39,15 @@ object Main extends IOApp:
         }
       }
       .as(ExitCode.Success)
+
+object ServerStream {
+  def serverStream[F[_]: Async]: Stream[F, ExitCode] =
+    BlazeServerBuilder[F]
+      .bindHttp(8080, "0.0.0.0")
+      .withHttpWebSocketApp(wsb =>
+        Router(
+          "/ws" -> BlazeWS[F].routes(wsb)
+        ).orNotFound
+      )
+      .serve
+}
