@@ -12,7 +12,7 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.implicits.*
 import org.http4s.server.websocket.WebSocketBuilder2
 import org.http4s.websocket.WebSocketFrame
-import org.http4s.websocket.WebSocketFrame.*
+import org.http4s.websocket.WebSocketFrame.{Close, Text}
 import org.http4s.HttpRoutes
 
 sealed trait Input
@@ -23,10 +23,10 @@ sealed trait Output
 case class OutText(value: String) extends Output
 case object OutQuit               extends Output
 
-class BlazeWS[F[_]](using F: Async[F]) extends Http4sDsl[F] {
-
-  val queue = Stream.eval(Queue.unbounded[F, Option[Input]])
-  val topic = Stream.eval(Topic[F, Output])
+class BlazeWS[F[_]](using F: Async[F])(
+    queue: Queue[F, Input],
+    topic: Topic[F, Output]
+) extends Http4sDsl[F] {
 
   def routes(wsb: WebSocketBuilder2[F]): HttpRoutes[F] =
     HttpRoutes.of[F] {
@@ -34,11 +34,6 @@ class BlazeWS[F[_]](using F: Async[F]) extends Http4sDsl[F] {
         Ok("You got me :)")
 
       case GET -> Root / "send" / channel => {
-
-        for {
-          t <- topic
-          p <- t.publish1(OutText("Got a GET request"))
-        } yield ()
 
         Ok(s"Successfully send a GET request to ${channel}")
       }
@@ -64,20 +59,23 @@ class BlazeWS[F[_]](using F: Async[F]) extends Http4sDsl[F] {
             F.unit
         }
         val toClient: Stream[F, WebSocketFrame] =
-          topic.flatMap(t =>
-            t.subscribe(10)
-              .map(
-                _ match
-                  case OutText(value) => Text(value)
-                  case OutQuit        => Close()
-              )
-          )
+          topic
+            .subscribe(10)
+            .map(
+              _ match
+                case OutText(value) => Text(value)
+                case OutQuit        => Close()
+            )
+
         wsb.build(toClient, fromClient)
       }
     }
 }
 
 object BlazeWS {
-  def apply[F[_]: Async]: BlazeWS[F] =
-    new BlazeWS[F]
+  def apply[F[_]: Async](
+      queue: Queue[F, Input],
+      topic: Topic[F, Output]
+  ): BlazeWS[F] =
+    new BlazeWS[F](queue, topic)
 }
