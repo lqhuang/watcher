@@ -1,3 +1,4 @@
+val cpsVersion      = "0.4.0"
 val http4sVersion   = "0.23.12"
 val blazeVersion    = http4sVersion
 val tapirVersion    = "1.1.3"
@@ -7,8 +8,8 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 scalacOptions ++= Seq(
   "-explain", // Explain errors in more detail.
-  "-feature", // Emit warning and location for usages of features that should be imported explicitly.
-  "-unchecked", // Enable additional warnings where generated code depends on assumptions.
+  // "-feature", // Emit warning and location for usages of features that should be imported explicitly.
+  // "-unchecked", // Enable additional warnings where generated code depends on assumptions.
   "-Yexplicit-nulls",
   // "-Xcheckinit", // Wrap field accessors to throw an exception on uninitialized access.
   // "-Ywarn-dead-code", // Warn when dead code is identified.
@@ -25,6 +26,7 @@ lazy val rootProject = (project in file(".")).settings(
     organization := "com.superbloch",
     scalaVersion := "3.2.0",
     libraryDependencies ++= Seq(
+      "org.typelevel"               %% "cats-effect-cps"     % cpsVersion,
       "org.http4s"                  %% "http4s-dsl"          % http4sVersion,
       "org.http4s"                  %% "http4s-blaze-server" % blazeVersion,
       "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion,

@@ -1,12 +1,15 @@
 package com.superbloch.watcher
 
-import scala.io.StdIn
+import scala.concurrent.duration.*
 
 import cats.syntax.all.*
-import cats.effect.cps.*
 import cats.effect.{Async, ExitCode, IO, IOApp, Resource}
+import cats.effect.std.{Console, Queue}
+import cats.effect.IO.consoleForIO
+import cats.effect.IO.asyncForIO
 
-import fs2.Stream
+import fs2.concurrent.Topic
+import fs2.{Pipe, Stream}
 
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.{Router, Server}
@@ -15,22 +18,19 @@ import WSEndpoints.wsRoute
 import APIEndpoints.apiV1Routes
 import DocsEndpoints.docsRoutes
 
-import cats.effect.std.Queue
-import fs2.concurrent.Topic
-
 object Main extends IOApp:
-  import MergedStream.*
 
-  override def run(args: List[String]): IO[ExitCode] = {
+  override def run(args: List[String]): IO[ExitCode] =
     val port = sys.env.get("http.port").map(_.toInt).getOrElse(8080)
-    buildApp()
-  }
+    new CombinedStream[IO].buildApp().compile.drain.as(ExitCode.Success)
 
-object MergedStream {
-  def makeServerStream[F[_]: Async](
-      queue: Queue[F, Input],
+class CombinedStream[F[_]: Async: Console] {
+
+  def makeServerStream[F[_]: Async: Console](
+      queue: Queue[F, Option[Input]],
       topic: Topic[F, Output]
-  ): Resource[F, Server] =
+  ): Stream[F, ExitCode] =
+    // ): Resource[F, Server] =
     BlazeServerBuilder[F]
       .bindHttp(8080, "0.0.0.0")
       .withHttpWebSocketApp(wsb =>
@@ -41,36 +41,38 @@ object MergedStream {
           // "/"       -> docsRoutes,
         ).orNotFound
       )
-      .resource
-    // .serve
-    // .use(server =>
-    //   IO.blocking {
-    //     println(
-    //       s"Go to http://localhost:${server.address.getPort}/api/docs to open SwaggerUI. Press ENTER key to exit."
-    //     )
-    //     StdIn.readLine()
-    //   }
-    // )
+      .serve
 
-  def buildApp[F[_]: Async](): F[ExitCode] = {
-    async[F] {
-      val queue = Queue.unbounded[F, Input].await
-      val topic = Topic[F, Output].await
+  def buildApp[F[_]: Async: Console](): Stream[F, Unit] = {
+    for {
+      queue <- Stream.eval(Queue.unbounded[F, Option[Input]])
+      topic <- Stream.eval(Topic[F, Output])
+      _ <- {
+        val serverStream = makeServerStream[F](queue, topic)
+        val processingStream =
+          Stream
+            .fromQueueNoneTerminated(queue)
+            .map(in =>
+              in match
+                case InText(value) => OutText(value)
+                case InQuit        => OutQuit
+            )
+            .through(topic.publish)
 
-      //   val keepAlive = Stream
-      //     .awakeEvery[F](30.seconds)
-      //     .map(_ => KeepAlive)
-      //     .through(topic.publish)
-      // }
+        val anyInput =
+          Stream
+            .eval(Console[F].readLine)
+            .map(in => {
+              Console[F].println(s"You got an input ${in}")
+              true
+            })
 
-      val serverResource                     = makeServerStream[F](queue, topic)
-      val forwardStream: Stream[F, ExitCode] = ???
+        println("Press ANY key to stop ...")
 
-      Stream
-        .resource(serverResource)
-        .parZip(Stream(forwardStream))
-        .compile
-        .drain
-    }
-  }.as(ExitCode.Success)
+        Stream(serverStream, processingStream).parJoinUnbounded
+          .interruptWhen(anyInput)
+      }
+    } yield ()
+  }
+
 }
