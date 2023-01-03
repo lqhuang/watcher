@@ -33,10 +33,11 @@ class BlazeWS[F[_]](using F: Async[F], console: Console[F])(
       case GET -> Root =>
         Ok("You got me :)")
 
-      case GET -> Root / "send" / channel => {
-        queue.offer(Some(InText(s"${channel}")))
-        Ok(s"Successfully send a GET request to ${channel}")
-      }
+      case GET -> Root / "send" / channel =>
+        for {
+          _    <- queue.offer(Some(InText(s"${channel}")))
+          resp <- Ok(s"Successfully send a GET request to ${channel}")
+        } yield resp
 
       case POST -> Root / "send" / channel =>
         Ok(s"Successful ping ${channel}")
@@ -66,10 +67,10 @@ class BlazeWS[F[_]](using F: Async[F], console: Console[F])(
                 case OutText(value) => Text(value)
                 case OutQuit        => Close()
             )
-
         wsb.build(toClient, fromClient)
       }
     }
+
 }
 
 object BlazeWS {
