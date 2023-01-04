@@ -25,7 +25,7 @@ case object OutQuit               extends Output
 
 class BlazeWS[F[_]](using F: Async[F], console: Console[F])(
     queue: Queue[F, Option[Input]],
-    topic: Topic[F, Output]
+    topic: Topic[F, Output],
 ) extends Http4sDsl[F] {
 
   def routes(wsb: WebSocketBuilder2[F]): HttpRoutes[F] =
@@ -45,7 +45,9 @@ class BlazeWS[F[_]](using F: Async[F], console: Console[F])(
       // alive route
       case GET -> Root / "ws" => {
         val toClient: Stream[F, WebSocketFrame] =
-          Stream.awakeEvery[F](2.seconds).map(d => Text(s"Hello! ${d}"))
+          Stream
+            .awakeEvery[F](2.seconds)
+            .map(d => Text(s"Hello! ${d.toSeconds}"))
         val fromClient: Pipe[F, WebSocketFrame, Unit] = _.evalMap {
           case Text(s, _) => console.println(s)
           case Close(_)   => console.println("Got CLOSE")
@@ -76,7 +78,7 @@ class BlazeWS[F[_]](using F: Async[F], console: Console[F])(
 object BlazeWS {
   def apply[F[_]: Async: Console](
       queue: Queue[F, Option[Input]],
-      topic: Topic[F, Output]
+      topic: Topic[F, Output],
   ): BlazeWS[F] =
     new BlazeWS[F](queue, topic)
 }

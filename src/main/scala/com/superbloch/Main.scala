@@ -28,9 +28,8 @@ class CombinedStream[F[_]: Async: Console] {
 
   def makeServerStream[F[_]: Async: Console](
       queue: Queue[F, Option[Input]],
-      topic: Topic[F, Output]
+      topic: Topic[F, Output],
   ): Stream[F, ExitCode] =
-    // ): Resource[F, Server] =
     BlazeServerBuilder[F]
       .bindHttp(8080, "0.0.0.0")
       .withHttpWebSocketApp(wsb =>
@@ -43,7 +42,7 @@ class CombinedStream[F[_]: Async: Console] {
       )
       .serve
 
-  def buildApp[F[_]: Async: Console](): Stream[F, Unit] = {
+  def buildApp[F[_]: Async: Console](): Stream[F, Unit] =
     for {
       queue <- Stream.eval(Queue.unbounded[F, Option[Input]])
       topic <- Stream.eval(Topic[F, Output])
@@ -55,7 +54,7 @@ class CombinedStream[F[_]: Async: Console] {
             .map(in =>
               in match
                 case InText(value) => OutText(value)
-                case InQuit        => OutQuit
+                case InQuit        => OutQuit,
             )
             .through(topic.publish)
 
@@ -68,11 +67,9 @@ class CombinedStream[F[_]: Async: Console] {
             })
 
         println("Press ANY key to stop ...")
-
         Stream(serverStream, processingStream).parJoinUnbounded
           .interruptWhen(anyInput)
       }
     } yield ()
-  }
 
 }
