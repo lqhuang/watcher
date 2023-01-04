@@ -1,14 +1,14 @@
-package com.superbloch
+package io.lqhuang.watcher
 
-import com.superbloch.Endpoints.{*, given}
+import watcher.*
+
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sttp.client3.testing.SttpBackendStub
-import sttp.client3.{UriContext, basicRequest}
+import sttp.client3.{basicRequest, UriContext}
 import sttp.tapir.server.stub.TapirStubInterpreter
 
-import Library.*
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import sttp.client3.jsoniter.*
@@ -18,10 +18,11 @@ class EndpointsSpec extends AnyFlatSpec with Matchers with EitherValues:
 
   it should "return hello message" in {
     // given
-    val backendStub = TapirStubInterpreter(SttpBackendStub(new CatsMonadError[IO]()))
-      .whenServerEndpoint(helloServerEndpoint)
-      .thenRunLogic()
-      .backend()
+    val backendStub =
+      TapirStubInterpreter(SttpBackendStub(new CatsMonadError[IO]()))
+        .whenServerEndpoint(helloServerEndpoint)
+        .thenRunLogic()
+        .backend()
 
     // when
     val response = basicRequest
@@ -34,10 +35,11 @@ class EndpointsSpec extends AnyFlatSpec with Matchers with EitherValues:
 
   it should "list available books" in {
     // given
-    val backendStub = TapirStubInterpreter(SttpBackendStub(new CatsMonadError[IO]()))
-      .whenServerEndpoint(booksListingServerEndpoint)
-      .thenRunLogic()
-      .backend()
+    val backendStub =
+      TapirStubInterpreter(SttpBackendStub(new CatsMonadError[IO]()))
+        .whenServerEndpoint(booksListingServerEndpoint)
+        .thenRunLogic()
+        .backend()
 
     // when
     val response = basicRequest
