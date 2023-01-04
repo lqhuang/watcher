@@ -1,4 +1,4 @@
-package com.superbloch.watcher
+package watcher
 
 import scala.concurrent.duration.*
 
@@ -14,7 +14,6 @@ import fs2.{Pipe, Stream}
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.{Router, Server}
 
-import WSEndpoints.wsRoute
 import APIEndpoints.apiV1Routes
 import DocsEndpoints.docsRoutes
 
@@ -36,7 +35,6 @@ class CombinedStream[F[_]: Async: Console] {
         Router(
           "/ws" -> BlazeWS[F](queue, topic).routes(wsb),
           // "/api/v1" -> apiV1Routes,
-          // "/ws/v1"  -> wsRoute(wsb),
           // "/"       -> docsRoutes,
         ).orNotFound
       )

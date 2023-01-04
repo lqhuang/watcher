@@ -1,4 +1,4 @@
-package com.superbloch.watcher
+package watcher
 
 import scala.concurrent.duration.*
 
