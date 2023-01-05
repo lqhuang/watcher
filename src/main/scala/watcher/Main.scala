@@ -1,3 +1,4 @@
+package io.lqhuang
 package watcher
 
 import scala.concurrent.duration.*
@@ -52,7 +53,7 @@ class CombinedStream[F[_]: Async: Console] {
             .map(in =>
               in match
                 case InText(value) => OutText(value)
-                case InQuit        => OutQuit,
+                case _             => OutText("..."),
             )
             .through(topic.publish)
 

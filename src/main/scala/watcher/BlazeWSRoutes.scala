@@ -1,3 +1,4 @@
+package io.lqhuang
 package watcher
 
 import scala.concurrent.duration.*
@@ -14,14 +15,6 @@ import org.http4s.server.websocket.WebSocketBuilder2
 import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.{Close, Text}
 import org.http4s.HttpRoutes
-
-sealed trait Input
-case class InText(value: String) extends Input
-case object InQuit               extends Input
-
-sealed trait Output
-case class OutText(value: String) extends Output
-case object OutQuit               extends Output
 
 class BlazeWS[F[_]](using F: Async[F], console: Console[F])(
     queue: Queue[F, Option[Input]],
@@ -67,7 +60,7 @@ class BlazeWS[F[_]](using F: Async[F], console: Console[F])(
             .map(
               _ match
                 case OutText(value) => Text(value)
-                case OutQuit        => Close()
+                case _              => Close()
             )
         wsb.build(toClient, fromClient)
       }
