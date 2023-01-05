@@ -3,14 +3,16 @@ package watcher
 
 import java.time.Instant
 
-import io.circe.generic.semiauto.{deriveCodec, deriveDecoder, deriveEncoder}
-import io.circe.{Codec, Decoder, Encoder, Json}
+import io.circe.{Codec, Json}
+import io.circe.generic.semiauto.deriveCodec
 import io.circe.syntax.*
 // import io.circe.generic.JsonCodec // ???
 
-// "-Yexplicit-nulls" is only available after:
-// https://github.com/circe/circe/issues/1786
-// https://github.com/circe/circe/pull/1788
+/**
+ * "-Yexplicit-nulls" is only available after:
+ * https://github.com/circe/circe/issues/1786
+ * https://github.com/circe/circe/pull/1788
+ */
 
 sealed trait Input
 

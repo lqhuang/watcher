@@ -8,9 +8,11 @@ import cats.effect.Async
 import cats.effect.std.{Console, Queue}
 import fs2.{Pipe, Stream}
 import fs2.concurrent.Topic
+import io.circe.syntax.*
 
 import org.http4s.dsl.Http4sDsl
 import org.http4s.implicits.*
+import org.http4s.circe.CirceEntityCodec.*
 import org.http4s.server.websocket.WebSocketBuilder2
 import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.{Close, Text}
@@ -32,8 +34,12 @@ class BlazeWS[F[_]](using F: Async[F], console: Console[F])(
           resp <- Ok(s"Successfully send a GET request to ${channel}")
         } yield resp
 
-      case POST -> Root / "send" / channel =>
-        Ok(s"Successful ping ${channel}")
+      case req @ POST -> Root / "send" / channel =>
+        for {
+          in   <- req.as[InEvent]
+          _    <- queue.offer(Some(in))
+          resp <- Ok(s"Successful ping ${channel}")
+        } yield resp
 
       // alive route
       case GET -> Root / "ws" => {
@@ -57,11 +63,11 @@ class BlazeWS[F[_]](using F: Async[F], console: Console[F])(
         val toClient: Stream[F, WebSocketFrame] =
           topic
             .subscribe(3)
-            .map(
+            .map {
               _ match
                 case OutText(value) => Text(value)
-                case _              => Close()
-            )
+                case out: OutEvent  => Text(out.asJson.noSpaces)
+            }
         wsb.build(toClient, fromClient)
       }
     }

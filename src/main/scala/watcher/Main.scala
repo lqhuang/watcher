@@ -1,16 +1,16 @@
 package io.lqhuang
 package watcher
 
+import java.time.Instant
 import scala.concurrent.duration.*
 
 import cats.syntax.all.*
 import cats.effect.{Async, ExitCode, IO, IOApp, Resource}
 import cats.effect.std.{Console, Queue}
-import cats.effect.IO.consoleForIO
-import cats.effect.IO.asyncForIO
+import cats.effect.IO.{asyncForIO, consoleForIO}
 
-import fs2.concurrent.Topic
 import fs2.{Pipe, Stream}
+import fs2.concurrent.Topic
 
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.{Router, Server}
@@ -50,11 +50,12 @@ class CombinedStream[F[_]: Async: Console] {
         val processingStream =
           Stream
             .fromQueueNoneTerminated(queue)
-            .map(in =>
+            .map { in =>
               in match
                 case InText(value) => OutText(value)
-                case _             => OutText("..."),
-            )
+                case InEvent(id, name, eventTime, payload) =>
+                  OutEvent(id, name, eventTime, Instant.now(), payload)
+            }
             .through(topic.publish)
 
         val anyInput =
