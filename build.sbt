@@ -50,7 +50,7 @@ lazy val rootProject = (project in file("."))
       name         := "watcher",
       version      := "0.1.0-SNAPSHOT",
       organization := "io.lqhuang",
-      scalaVersion := "3.2.0",
+      scalaVersion := "3.2.1",
       libraryDependencies ++= dependencies,
       Compile / mainClass := Some("io.lqhuang.watcher.Main"),
       // In order to generate launch scripts only for specified `mainClass`,
