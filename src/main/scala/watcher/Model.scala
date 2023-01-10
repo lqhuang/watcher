@@ -4,8 +4,8 @@ package watcher
 import java.time.Instant
 
 import io.circe.{Codec, Json}
-import io.circe.generic.semiauto.deriveCodec
 import io.circe.syntax.*
+// import io.circe.generic.semiauto.deriveCodec
 // import io.circe.generic.JsonCodec // ???
 
 /**
