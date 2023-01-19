@@ -19,7 +19,7 @@ object APIEndpoints {
     endpoint.get.in("").out(stringBody).tag("Receiver")
   val indexServerEndpoint =
     indexEndpoint.serverLogicSuccess(_ =>
-      IO.pure("Hello! Here is Watcher 0.1.0")
+      IO.pure("Hello! Here is Watcher 0.1.1")
     )
 
   // val helloEndpoint: PublicEndpoint[User, Unit, String, Any] = endpoint.get

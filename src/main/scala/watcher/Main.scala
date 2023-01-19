@@ -58,17 +58,20 @@ class CombinedStream[F[_]: Async: Console] {
             }
             .through(topic.publish)
 
-        val anyInput =
-          Stream
-            .eval(Console[F].readLine)
-            .map(in => {
-              Console[F].println(s"You got an input ${in}")
-              true
-            })
+        /**
+         * ANY Key interruption may not work normally in docker environment
+         */
+        // val anyInput =
+        //   Stream
+        //     .eval(Console[F].readLine)
+        //     .map(in => {
+        //       Console[F].println(s"You got an input ${in}")
+        //       true
+        //     })
 
-        println("Press ANY key to stop ...")
+        // println("Press ANY key to stop ...")
         Stream(serverStream, processingStream).parJoinUnbounded
-          .interruptWhen(anyInput)
+        // .interruptWhen(anyInput)
       }
     } yield ()
 
