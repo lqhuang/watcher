@@ -53,7 +53,7 @@ lazy val rootProject = (project in file("."))
     Seq(
       name         := "watcher",
       packageName  := "watcher",
-      version      := "0.1.1-SNAPSHOT",
+      version      := "0.1.2-SNAPSHOT",
       organization := "io.lqhuang",
       scalaVersion := "3.2.1",
       libraryDependencies ++= dependencies,
