@@ -1,19 +1,19 @@
 import java.time.Instant
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit.MILLIS
 
-import io.circe.{Json, JsonObject}
+import io.circe.{Encoder, Json, JsonObject}
 import io.circe.syntax.*
 import io.circe.parser.{decode, parse}
-import io.circe.Encoder.*
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.Assertions.*
 
-import io.lqhuang.watcher.{InEvent, OutEvent}
+import io.lqhuang.watcher.data.{InEvent, OutEvent}
 
 class ModelSuite extends AnyFunSuite {
 
   test("parsing InEvent") {
-
     val rawJson: String = """
     {
       "id": 13,
@@ -54,7 +54,6 @@ class ModelSuite extends AnyFunSuite {
   }
 
   test("InEvent asJson") {
-
     val rawJson: String = """
     {
       "id": 13,
@@ -92,4 +91,33 @@ class ModelSuite extends AnyFunSuite {
     assertResult(encoded)(actual)
   }
 
+  test("time resolution in OutEvent json") {
+    val nanosInstant = Instant.now()
+    val eventTime    = Instant.ofEpochMilli(1672905895697L)
+    val outEvent = OutEvent(
+      0,
+      "test-out-event",
+      eventTime,
+      nanosInstant,
+      Json.Null,
+    )
+
+    val decodedOutEvent =
+      decode[OutEvent](outEvent.asJson.noSpaces).getOrElse(null)
+
+    assertResult(eventTime)(decodedOutEvent.eventTime)
+    assertResult(nanosInstant.truncatedTo(MILLIS))(decodedOutEvent.arrivalTime)
+  }
+
+  test("test codec for Instant") {
+    import io.lqhuang.watcher.data.given Encoder[Instant]
+
+    val t1    = Instant.ofEpochMilli(1672905895697L)
+    val tNano = Instant.now()
+
+    assertResult("2023-01-05T08:04:55.697Z")(t1.asJson.asString.get)
+    assertResult(tNano.truncatedTo(MILLIS).toString())(
+      tNano.asJson.asString.get
+    )
+  }
 }

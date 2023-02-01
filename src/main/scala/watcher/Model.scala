@@ -1,9 +1,12 @@
 package io.lqhuang
-package watcher
+package watcher.data
 
 import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter.{ISO_INSTANT, ISO_OFFSET_DATE_TIME}
+import java.time.temporal.ChronoUnit.MILLIS
 
-import io.circe.{Codec, Json}
+import io.circe.{Codec, Encoder, Json}
 import io.circe.syntax.*
 // import io.circe.generic.semiauto.deriveCodec
 // import io.circe.generic.JsonCodec // ???
@@ -14,10 +17,15 @@ import io.circe.syntax.*
  * https://github.com/circe/circe/pull/1788
  */
 
+given customEncodeInstant: Encoder[Instant] =
+  Encoder.encodeString.contramap[Instant](t =>
+    ISO_OFFSET_DATE_TIME.format(
+      t.truncatedTo(MILLIS).atOffset(ZoneOffset.ofHours(0))
+    )
+  )
+
 sealed trait Input
-
 final case class InText(value: String) extends Input
-
 final case class InEvent(
     id: Int,
     name: String,
@@ -26,11 +34,8 @@ final case class InEvent(
 ) extends Input
   derives Codec.AsObject
 
-// given Codec[InEvent] = deriveCodec[InEvent]
-
 sealed trait Output
 final case class OutText(value: String) extends Output
-
 final case class OutEvent(
     id: Int,
     name: String,
@@ -39,5 +44,3 @@ final case class OutEvent(
     payload: Json,
 ) extends Output
   derives Codec.AsObject
-
-// given Codec[OutEvent] = deriveCodec[OutEvent]

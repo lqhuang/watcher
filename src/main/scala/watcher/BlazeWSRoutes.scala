@@ -18,6 +18,8 @@ import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.{Close, Text}
 import org.http4s.HttpRoutes
 
+import data.*
+
 class BlazeWS[F[_]](using F: Async[F], console: Console[F])(
     queue: Queue[F, Option[Input]],
     topic: Topic[F, Output],

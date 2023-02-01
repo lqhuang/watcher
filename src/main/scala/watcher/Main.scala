@@ -15,6 +15,8 @@ import fs2.concurrent.Topic
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.{Router, Server}
 
+import data.*
+
 import APIEndpoints.apiV1Routes
 import DocsEndpoints.docsRoutes
 
