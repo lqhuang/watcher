@@ -10,7 +10,6 @@ sbt test # run the tests
 sbt run # run the application (Main)
 ```
 
-
 ## Build
 
 ### Prerequisites
@@ -26,4 +25,7 @@ gu install native-image
 ```
 sbt Docker/stage
 sbt Docker/publishLocal
+sbt Docker/publish
 ```
+
+**Warning**: Before executing `Docker/publish`, you need to login to container registry outside `sbt`.

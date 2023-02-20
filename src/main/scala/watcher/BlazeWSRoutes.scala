@@ -12,7 +12,7 @@ import io.circe.syntax.*
 
 import org.http4s.dsl.Http4sDsl
 import org.http4s.implicits.*
-import org.http4s.circe.CirceEntityCodec.*
+import org.http4s.circe.CirceEntityCodec.circeEntityDecoder
 import org.http4s.server.websocket.WebSocketBuilder2
 import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.{Close, Text}

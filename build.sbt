@@ -4,7 +4,7 @@ val cpsVersion      = "0.4.0"
 val ceVersion       = "3.4.4"
 val http4sVersion   = "0.23.12"
 val blazeVersion    = http4sVersion
-val circeVersion    = "0.14.3"
+val circeVersion    = "0.14.4"
 val tapirVersion    = "1.1.3"
 val jsoniterVersion = "2.17.5"
 
@@ -15,8 +15,10 @@ Compile / run / fork := true
 scalacOptions ++= Seq(
   // "-feature", // Emit warning and location for usages of features that should be imported explicitly.
   // "-unchecked", // Enable additional warnings where generated code depends on assumptions.
+  // "-language:strictEquality",
   "-explain", // Explain errors in more detail.
-  // "-Yexplicit-nulls", // Fail with `circe`
+  "-Yexplicit-nulls",
+  "-Ysafe-init",
   // "-Ymacro-annotations",
   // "-Xcheckinit", // Wrap field accessors to throw an exception on uninitialized access.
   // "-Ywarn-dead-code", // Warn when dead code is identified.
@@ -53,7 +55,7 @@ lazy val rootProject = (project in file("."))
     Seq(
       name         := "watcher",
       packageName  := "watcher",
-      version      := "0.1.2-SNAPSHOT",
+      version      := "0.1.3-SNAPSHOT",
       organization := "io.lqhuang",
       scalaVersion := "3.2.1",
       libraryDependencies ++= dependencies,

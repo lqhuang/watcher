@@ -3,13 +3,13 @@ package watcher.data
 
 import java.time.Instant
 import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter.{ISO_INSTANT, ISO_OFFSET_DATE_TIME}
+import java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME
 import java.time.temporal.ChronoUnit.MILLIS
 
 import io.circe.{Codec, Encoder, Json}
 import io.circe.syntax.*
 // import io.circe.generic.semiauto.deriveCodec
-// import io.circe.generic.JsonCodec // ???
+// import io.circe.generic.JsonCodec
 
 /**
  * "-Yexplicit-nulls" is only available after:
@@ -17,11 +17,13 @@ import io.circe.syntax.*
  * https://github.com/circe/circe/pull/1788
  */
 
-given customEncodeInstant: Encoder[Instant] =
+given Encoder[Instant] =
   Encoder.encodeString.contramap[Instant](t =>
-    ISO_OFFSET_DATE_TIME.format(
-      t.truncatedTo(MILLIS).atOffset(ZoneOffset.ofHours(0))
-    )
+    ISO_OFFSET_DATE_TIME.nn
+      .format(
+        t.nn.truncatedTo(MILLIS).nn.atOffset(ZoneOffset.UTC)
+      )
+      .nn
   )
 
 sealed trait Input

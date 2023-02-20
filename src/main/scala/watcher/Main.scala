@@ -3,6 +3,7 @@ package watcher
 
 import java.time.Instant
 import scala.concurrent.duration.*
+import scala.language.unsafeNulls
 
 import cats.syntax.all.*
 import cats.effect.{Async, ExitCode, IO, IOApp, Resource}
@@ -17,17 +18,15 @@ import org.http4s.server.{Router, Server}
 
 import data.*
 
-import APIEndpoints.apiV1Routes
-import DocsEndpoints.docsRoutes
+// import APIEndpoints.apiV1Routes
+// import DocsEndpoints.docsRoutes
 
 object Main extends IOApp:
-
   override def run(args: List[String]): IO[ExitCode] =
     val port = sys.env.get("http.port").map(_.toInt).getOrElse(8080)
     new CombinedStream[IO].buildApp().compile.drain.as(ExitCode.Success)
 
 class CombinedStream[F[_]: Async: Console] {
-
   def makeServerStream[F[_]: Async: Console](
       queue: Queue[F, Option[Input]],
       topic: Topic[F, Output],
