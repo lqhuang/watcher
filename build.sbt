@@ -81,7 +81,7 @@ lazy val rootProject = (project in file("."))
       dockerBaseImage                      := "eclipse-temurin:17.0.5_8-jre",
       dockerExposedPorts                   := Seq(8080),
       dockerPermissionStrategy := DockerPermissionStrategy.CopyChown,
-      dockerRepository         := Some(""),
-      dockerUsername           := Some(""),
+      dockerRepository         := Some("ghcr.io"),
+      dockerUsername           := Some("lqhuang"),
     )
   )
