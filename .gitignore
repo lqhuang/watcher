@@ -15,3 +15,7 @@ target
 metals.sbt
 project/project
 .bsp/
+
+# stainless
+stainless/
+project/lib/sbt-stainless.jar
