@@ -8,8 +8,7 @@ val circeVersion    = "0.14.4"
 val tapirVersion    = "1.1.3"
 val jsoniterVersion = "2.17.5"
 
-Global / onChangedBuildSource := ReloadOnSourceChanges
-
+// Global / onChangedBuildSource := ReloadOnSourceChanges
 Compile / run / fork := true
 
 scalacOptions ++= Seq(
@@ -46,18 +45,28 @@ val dependencies = Seq(
   "org.typelevel" %% "cats-effect" % ceVersion % Test,
 )
 
+val headerLic = HeaderLicense.ALv2(
+  "2022",
+  "Lanqing Huang",
+  HeaderLicenseStyle.SpdxSyntax
+)
+
+// .enablePlugins(StainlessPlugin)
 lazy val rootProject = (project in file("."))
+  .enablePlugins(AutomateHeaderPlugin)
   .enablePlugins(JavaAppPackaging)
   .enablePlugins(DockerPlugin)
   .enablePlugins(AshScriptPlugin) // For alpine ash script
   .enablePlugins(GraalVMNativeImagePlugin)
   .settings(
     Seq(
-      name         := "watcher",
-      packageName  := "watcher",
-      version      := "0.1.3-SNAPSHOT",
-      organization := "io.lqhuang",
-      scalaVersion := "3.2.1",
+      name            := "watcher",
+      packageName     := "watcher",
+      version         := "0.1.3-SNAPSHOT",
+      organization    := "io.lqhuang",
+      headerLicense   := Some(headerLic),
+      headerEmptyLine := false,
+      scalaVersion    := "3.2.1",
       libraryDependencies ++= dependencies,
       Compile / mainClass := Some("io.lqhuang.watcher.Main"),
       /**

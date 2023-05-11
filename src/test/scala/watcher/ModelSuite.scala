@@ -1,3 +1,8 @@
+/*
+ * Copyright 2022 Lanqing Huang
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit.MILLIS
