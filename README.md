@@ -10,15 +10,26 @@ sbt test # run the tests
 sbt run # run the application (Main)
 ```
 
+### Using `sbt` as Metals build server
+
+While Metals uses `sbt` as the build server, we can also log into the same sbt
+session using a thin client. From Terminal section, type in
+
+```sh
+sbt --client
+```
+
+This lets you log into the sbt session Metals has started.
+
 ## Build
 
-### Prerequisites
+### Build to native-image
+
+Before building, you should install prerequisites binary `native-image` from Graal.
 
 ```
 gu install native-image
 ```
-
-### Build to native-image
 
 ### Build to docker
 
@@ -28,4 +39,5 @@ sbt Docker/publishLocal
 sbt Docker/publish
 ```
 
-**Warning**: Before executing `Docker/publish`, you need to login to container registry outside `sbt`.
+**Warning**: Before executing `Docker/publish`, you need to login to container
+registry outside `sbt`.
