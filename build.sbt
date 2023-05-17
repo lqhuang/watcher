@@ -1,13 +1,13 @@
 import com.typesafe.sbt.packager.docker.DockerPermissionStrategy
 
-val cpsVersion      = "0.4.0"
+// val cpsVersion      = "0.4.0"
 val ceVersion       = "3.4.4"
 val log4catsVersion = "2.6.0"
 val http4sVersion   = "0.23.12"
 val blazeVersion    = http4sVersion
 val circeVersion    = "0.14.4"
-val tapirVersion    = "1.1.3"
 val jsoniterVersion = "2.17.5"
+// val tapirVersion    = "1.1.3"
 
 // Global / onChangedBuildSource := ReloadOnSourceChanges
 Compile / run / fork := true
@@ -30,18 +30,18 @@ ThisBuild / semanticdbEnabled := true
 ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.1.5"
 
 val dependencies = Seq(
-  // "org.typelevel"               %% "cats-effect-cps"     % cpsVersion,
-  "org.typelevel"               %% "cats-effect-std"         % ceVersion,
-  "org.typelevel"               %% "log4cats-slf4j"          % log4catsVersion,
-  "org.http4s"                  %% "http4s-dsl"              % http4sVersion,
-  "org.http4s"                  %% "http4s-blaze-server"     % blazeVersion,
-  "org.http4s"                  %% "http4s-circe"            % http4sVersion,
-  "io.circe"                    %% "circe-core"              % circeVersion,
-  "io.circe"                    %% "circe-generic"           % circeVersion,
-  "io.circe"                    %% "circe-parser"            % circeVersion,
-  "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % tapirVersion,
-  "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
-  "com.softwaremill.sttp.tapir" %% "tapir-asyncapi-docs"     % tapirVersion,
+  "org.typelevel" %% "cats-effect-cps"     % cpsVersion,
+  "org.typelevel" %% "cats-effect-std"     % ceVersion,
+  "org.typelevel" %% "log4cats-slf4j"      % log4catsVersion,
+  "org.http4s"    %% "http4s-dsl"          % http4sVersion,
+  "org.http4s"    %% "http4s-blaze-server" % blazeVersion,
+  "org.http4s"    %% "http4s-circe"        % http4sVersion,
+  "io.circe"      %% "circe-core"          % circeVersion,
+  "io.circe"      %% "circe-generic"       % circeVersion,
+  "io.circe"      %% "circe-parser"        % circeVersion,
+  // "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % tapirVersion,
+  // "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
+  // "com.softwaremill.sttp.tapir" %% "tapir-asyncapi-docs"     % tapirVersion,
   // "ch.qos.logback"              %% "logback-classic"         % "1.4.4",
   // "com.softwaremill.sttp.tapir" %% "tapir-sttp-stub-server" % tapirVersion % Test,
   "org.scalatest" %% "scalatest"   % "3.2.14"  % Test,
