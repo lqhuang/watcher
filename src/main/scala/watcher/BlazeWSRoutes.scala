@@ -23,12 +23,16 @@ import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.{Close, Text}
 import org.http4s.HttpRoutes
 
+import org.typelevel.log4cats.LoggerFactory
+
 import data.*
 
-class BlazeWS[F[_]](using F: Async[F], console: Console[F])(
+class BlazeWS[F[_]: LoggerFactory](using async: Async[F], console: Console[F])(
     queue: Queue[F, Option[Input]],
     topic: Topic[F, Output],
 ) extends Http4sDsl[F] {
+
+  val logger = LoggerFactory[F].getLogger
 
   def routes(wsb: WebSocketBuilder2[F]): HttpRoutes[F] =
     HttpRoutes.of[F] {
@@ -65,7 +69,7 @@ class BlazeWS[F[_]](using F: Async[F], console: Console[F])(
       case GET -> Root / "ws" / channel => {
         val fromClient: Pipe[F, WebSocketFrame, Unit] = _.evalMap {
           case Text(s, _) => console.println(s)
-          case _          => F.unit
+          case _          => async.unit
         }
         val toClient: Stream[F, WebSocketFrame] =
           topic
@@ -82,7 +86,7 @@ class BlazeWS[F[_]](using F: Async[F], console: Console[F])(
 }
 
 object BlazeWS {
-  def apply[F[_]: Async: Console](
+  def apply[F[_]: Async: Console: LoggerFactory](
       queue: Queue[F, Option[Input]],
       topic: Topic[F, Output],
   ): BlazeWS[F] =

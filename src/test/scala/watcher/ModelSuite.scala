@@ -38,7 +38,7 @@ class ModelSuite extends AnyFunSuite {
     val inEvent = InEvent(
       13,
       "test-event",
-      Instant.ofEpochMilli(1672905895697L),
+      Instant.ofEpochMilli(1672905895697L).nn,
       payload = Json.fromJsonObject(
         JsonObject(
           "datetime"   -> Json.fromString("2023-01-05T08:04:55.697+00:00"),
@@ -78,7 +78,7 @@ class ModelSuite extends AnyFunSuite {
     val inEvent = InEvent(
       13,
       "test-event",
-      Instant.ofEpochMilli(1672905895697L),
+      Instant.ofEpochMilli(1672905895697L).nn,
       payload = Json.fromJsonObject(
         JsonObject(
           "datetime"   -> Json.fromString("2023-01-05T08:04:55.697Z"),
@@ -97,8 +97,8 @@ class ModelSuite extends AnyFunSuite {
   }
 
   test("time resolution in OutEvent json") {
-    val nanosInstant = Instant.now()
-    val eventTime    = Instant.ofEpochMilli(1672905895697L)
+    val nanosInstant = Instant.now().nn
+    val eventTime    = Instant.ofEpochMilli(1672905895697L).nn
     val outEvent = OutEvent(
       0,
       "test-out-event",
@@ -108,7 +108,7 @@ class ModelSuite extends AnyFunSuite {
     )
 
     val decodedOutEvent =
-      decode[OutEvent](outEvent.asJson.noSpaces).getOrElse(null)
+      decode[OutEvent](outEvent.asJson.noSpaces).getOrElse(null).nn
 
     assertResult(eventTime)(decodedOutEvent.eventTime)
     assertResult(nanosInstant.truncatedTo(MILLIS))(decodedOutEvent.arrivalTime)
@@ -117,8 +117,8 @@ class ModelSuite extends AnyFunSuite {
   test("test codec for Instant") {
     import io.lqhuang.watcher.data.given Encoder[Instant]
 
-    val t1    = Instant.ofEpochMilli(1672905895697L)
-    val tNano = Instant.now()
+    val t1    = Instant.ofEpochMilli(1672905895697L).nn
+    val tNano = Instant.now().nn
 
     assertResult("2023-01-05T08:04:55.697Z")(t1.asJson.asString.get)
     assertResult(tNano.truncatedTo(MILLIS).toString())(

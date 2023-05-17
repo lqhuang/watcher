@@ -17,9 +17,13 @@ import cats.effect.IO.{asyncForIO, consoleForIO}
 
 import fs2.{Pipe, Stream}
 import fs2.concurrent.Topic
+// import fs2.Compiler.Target.forConcurrent
 
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.{Router, Server}
+
+import org.typelevel.log4cats.LoggerFactory
+import org.typelevel.log4cats.slf4j.{loggerFactoryforSync, Slf4jFactory}
 
 import data.*
 
@@ -27,12 +31,17 @@ import data.*
 // import DocsEndpoints.docsRoutes
 
 object Main extends IOApp:
+
+  given Async[IO]         = asyncForIO
+  given Console[IO]       = consoleForIO
+  given LoggerFactory[IO] = Slf4jFactory[IO]
+
   override def run(args: List[String]): IO[ExitCode] =
     val port = sys.env.get("http.port").map(_.toInt).getOrElse(8080)
     new CombinedStream[IO].buildApp().compile.drain.as(ExitCode.Success)
 
-class CombinedStream[F[_]: Async: Console] {
-  def makeServerStream[F[_]: Async: Console](
+class CombinedStream[F[_]: Async: Console: LoggerFactory] {
+  def makeServerStream[F[_]: Async: Console: LoggerFactory](
       queue: Queue[F, Option[Input]],
       topic: Topic[F, Output],
   ): Stream[F, ExitCode] =
@@ -47,7 +56,7 @@ class CombinedStream[F[_]: Async: Console] {
       )
       .serve
 
-  def buildApp[F[_]: Async: Console](): Stream[F, Unit] =
+  def buildApp[F[_]: Async: Console: LoggerFactory](): Stream[F, Unit] =
     for {
       queue <- Stream.eval(Queue.unbounded[F, Option[Input]])
       topic <- Stream.eval(Topic[F, Output])
