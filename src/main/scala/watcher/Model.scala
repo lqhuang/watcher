@@ -39,7 +39,15 @@ final case class InEvent(
     eventTime: Instant,
     payload: Json
 ) extends Input
-  derives Codec.AsObject
+  derives Codec.AsObject {
+  def toOutEvent: OutEvent = OutEvent(
+    id,
+    name,
+    eventTime,
+    Instant.now().nn,
+    payload
+  )
+}
 
 sealed trait Output
 final case class OutText(value: String) extends Output
@@ -51,3 +59,11 @@ final case class OutEvent(
     payload: Json,
 ) extends Output
   derives Codec.AsObject
+
+case class WatcherResponse(
+    msg: String
+) derives Codec.AsObject
+
+case class ChannelList(
+    channels: List[String]
+) derives Codec.AsObject

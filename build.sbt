@@ -30,7 +30,7 @@ ThisBuild / semanticdbEnabled := true
 ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.1.5"
 
 val dependencies = Seq(
-  "org.typelevel" %% "cats-effect-cps"     % cpsVersion,
+  // "org.typelevel" %% "cats-effect-cps"     % cpsVersion,
   "org.typelevel" %% "cats-effect-std"     % ceVersion,
   "org.typelevel" %% "log4cats-slf4j"      % log4catsVersion,
   "org.http4s"    %% "http4s-dsl"          % http4sVersion,
