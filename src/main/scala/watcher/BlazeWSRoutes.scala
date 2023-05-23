@@ -80,6 +80,24 @@ class BlazeWS[F[_]: LoggerFactory](using async: Async[F])(
           resp       <- Ok(s"Successfully send a GET request to ${channel}")
         } yield resp
 
+      case GET -> Root / "delete" / channel =>
+        for {
+          maybeQueue <- getQueue(channel)
+          resp <- maybeQueue match
+            case None =>
+              NotFound(
+                WatcherResponse(
+                  s"Channel ${channel} not found. Please create it first"
+                )
+              )
+            case Some(queue) =>
+              queueMapRef.update(_ - channel) *> Ok(
+                WatcherResponse(
+                  s"Successfully deleted channel ${channel}"
+                )
+              )
+        } yield resp
+
       case req @ POST -> Root / "send" / channel =>
         for {
           in         <- req.as[InEvent]
