@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Lanqing Huang
+ * Copyright 2023 Lanqing Huang
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -91,7 +91,7 @@ class ModelSuite extends AnyFunSuite {
       )
     )
 
-    val actual  = parse(rawJson).getOrElse(null).asJson.spaces2
+    val actual  = parse(rawJson).getOrElse(Json.Null).asJson.spaces2
     val encoded = inEvent.asJson.spaces2
     assertResult(encoded)(actual)
   }
