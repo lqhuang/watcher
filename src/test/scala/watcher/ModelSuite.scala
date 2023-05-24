@@ -11,12 +11,11 @@ import io.circe.{Encoder, Json, JsonObject}
 import io.circe.syntax.*
 import io.circe.parser.{decode, parse}
 
-import org.scalatest.funsuite.AnyFunSuite
-import org.scalatest.Assertions.*
+import munit.FunSuite
 
 import io.lqhuang.watcher.data.{InEvent, OutEvent}
 
-class ModelSuite extends AnyFunSuite {
+class ModelSuite extends FunSuite {
 
   test("parsing InEvent") {
     val rawJson: String = """
@@ -55,7 +54,7 @@ class ModelSuite extends AnyFunSuite {
     val parsedInEvent = result.getOrElse(null)
 
     assert(result.isRight)
-    assertResult(parsedInEvent)(inEvent)
+    assertEquals(parsedInEvent, inEvent)
   }
 
   test("InEvent asJson") {
@@ -93,7 +92,7 @@ class ModelSuite extends AnyFunSuite {
 
     val actual  = parse(rawJson).getOrElse(Json.Null).asJson.spaces2
     val encoded = inEvent.asJson.spaces2
-    assertResult(encoded)(actual)
+    assertEquals(encoded, actual)
   }
 
   test("time resolution in OutEvent json") {
@@ -110,8 +109,8 @@ class ModelSuite extends AnyFunSuite {
     val decodedOutEvent =
       decode[OutEvent](outEvent.asJson.noSpaces).getOrElse(null).nn
 
-    assertResult(eventTime)(decodedOutEvent.eventTime)
-    assertResult(nanosInstant.truncatedTo(MILLIS))(decodedOutEvent.arrivalTime)
+    assertEquals(eventTime, decodedOutEvent.eventTime)
+    assertEquals(nanosInstant.truncatedTo(MILLIS), decodedOutEvent.arrivalTime)
   }
 
   test("test codec for Instant") {
@@ -120,8 +119,9 @@ class ModelSuite extends AnyFunSuite {
     val t1    = Instant.ofEpochMilli(1672905895697L).nn
     val tNano = Instant.now().nn
 
-    assertResult("2023-01-05T08:04:55.697Z")(t1.asJson.asString.get)
-    assertResult(tNano.truncatedTo(MILLIS).toString())(
+    assertEquals("2023-01-05T08:04:55.697Z", t1.asJson.asString.get)
+    assertEquals(
+      tNano.truncatedTo(MILLIS).toString(),
       tNano.asJson.asString.get
     )
   }

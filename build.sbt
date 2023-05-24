@@ -7,6 +7,7 @@ val http4sVersion   = "0.23.19"
 val blazeVersion    = "0.23.15"
 val circeVersion    = "0.14.5"
 val jsoniterVersion = "2.17.5"
+val munitVersion    = "0.7.29"
 // val tapirVersion    = "1.1.3"
 
 // Global / onChangedBuildSource := ReloadOnSourceChanges
@@ -42,10 +43,12 @@ val dependencies = Seq(
   // "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % tapirVersion,
   // "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
   // "com.softwaremill.sttp.tapir" %% "tapir-asyncapi-docs"     % tapirVersion,
-  // "ch.qos.logback"              %% "logback-classic"         % "1.4.4",
-  // "com.softwaremill.sttp.tapir" %% "tapir-sttp-stub-server" % tapirVersion % Test,
-  "org.scalatest" %% "scalatest"   % "3.2.14"  % Test,
-  "org.typelevel" %% "cats-effect" % ceVersion % Test,
+  "org.scalameta"       %% "munit"                      % munitVersion % Test,
+  "org.http4s"          %% "http4s-blaze-client"        % blazeVersion % Test,
+  "org.typelevel"       %% "cats-effect"                % ceVersion    % Test,
+  "com.alejandrohdezma" %% "http4s-munit"               % "0.15.0"     % Test,
+  "com.dimafeng"        %% "testcontainers-scala-munit" % "0.40.15"    % Test,
+  // "org.typelevel"       %% "munit-cats-effect"   % "v2.0.0-M3"  % Test,
 )
 
 val headerLic = HeaderLicense.ALv2(
@@ -65,7 +68,7 @@ lazy val rootProject = (project in file("."))
     Seq(
       name            := "watcher",
       packageName     := "watcher",
-      version         := "0.1.3-SNAPSHOT",
+      version         := "0.1.4-SNAPSHOT",
       organization    := "io.lqhuang",
       headerLicense   := Some(headerLic),
       headerEmptyLine := false,
