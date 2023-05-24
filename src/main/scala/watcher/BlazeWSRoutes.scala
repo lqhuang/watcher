@@ -30,16 +30,18 @@ import org.http4s.HttpRoutes
 import org.typelevel.log4cats.LoggerFactory
 
 import data.*
-import types.QueueMapRef
+import types.{EventQueue, QueueMapRef}
 
-class BlazeWS[F[_]: LoggerFactory](using async: Async[F])(
-    queueMapRef: QueueMapRef[F],
-) extends Http4sDsl[F] {
+class BlazeWS[F[_]: LoggerFactory](using async: Async[F])()
+  extends Http4sDsl[F] {
 
   val logger = LoggerFactory[F].getLogger
 
-  def getQueue(key: String): F[Option[Queue[F, Option[OutEvent]]]] =
-    queueMapRef.get.map(_.get(key))
+  val mapRefContext: F[QueueMapRef[F]] =
+    Ref[F].of(Map.empty[String, EventQueue[F]])
+
+  def getQueue(key: String): F[Option[EventQueue[F]]] =
+    mapRefContext.flatMap(ref => ref.get.map(x => x.get(key)))
 
   def routes(wsb: WebSocketBuilder2[F]): HttpRoutes[F] =
     HttpRoutes.of[F] {
@@ -47,16 +49,21 @@ class BlazeWS[F[_]: LoggerFactory](using async: Async[F])(
         Ok("You got me :)")
 
       case GET -> Root / "list-channels" =>
-        queueMapRef.get.map(_.keys.toSeq.asJson).flatMap(Ok(_))
+        for {
+          mapRef       <- mapRefContext
+          jsonChannels <- mapRef.get.map(_.keys.toSeq.asJson)
+          resp         <- Ok(jsonChannels)
+        } yield resp
 
       case GET -> Root / "create" / channel =>
         for {
           maybeQueue <- getQueue(channel)
+          mapRef     <- mapRefContext
           existed <- maybeQueue match
             case None =>
               Queue
                 .unbounded[F, Option[OutEvent]]
-                .map(queue => queueMapRef.update(_.updated(channel, queue)))
+                .map(queue => mapRef.update(_.updated(channel, queue)))
                 .map(_ => false)
             case Some(queue) => async.pure(true)
           resp <- existed match
@@ -83,6 +90,7 @@ class BlazeWS[F[_]: LoggerFactory](using async: Async[F])(
       case GET -> Root / "delete" / channel =>
         for {
           maybeQueue <- getQueue(channel)
+          mapRef     <- mapRefContext
           resp <- maybeQueue match
             case None =>
               NotFound(
@@ -91,7 +99,7 @@ class BlazeWS[F[_]: LoggerFactory](using async: Async[F])(
                 )
               )
             case Some(queue) =>
-              queueMapRef.update(_ - channel) *> Ok(
+              mapRef.update(_ - channel) *> Ok(
                 WatcherResponse(
                   s"Successfully deleted channel ${channel}"
                 )
@@ -161,8 +169,6 @@ class BlazeWS[F[_]: LoggerFactory](using async: Async[F])(
 }
 
 object BlazeWS {
-  def apply[F[_]: Async: LoggerFactory](
-      queueMapRef: QueueMapRef[F]
-  ): BlazeWS[F] =
-    new BlazeWS[F](queueMapRef)
+  def apply[F[_]: Async: LoggerFactory](): BlazeWS[F] =
+    new BlazeWS[F]()
 }

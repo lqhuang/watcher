@@ -12,4 +12,5 @@ import cats.effect.std.Queue
 
 import data.*
 
-type QueueMapRef[F[_]] = Ref[F, Map[String, Queue[F, Option[OutEvent]]]]
+type EventQueue[F[_]]  = Queue[F, Option[OutEvent]]
+type QueueMapRef[F[_]] = Ref[F, Map[String, EventQueue[F]]]
