@@ -34,16 +34,14 @@ import org.typelevel.log4cats.LoggerFactory
 import data.*
 import types.{EventQueue, QueueMapRef}
 
-class BlazeWS[F[_]: LoggerFactory](using async: Async[F])()
-  extends Http4sDsl[F] {
+class BlazeWS[F[_]: LoggerFactory](using async: Async[F])(
+    queueMap: QueueMapRef[F]
+) extends Http4sDsl[F] {
 
   val logger = LoggerFactory[F].getLogger
 
-  val mapRefContext: F[QueueMapRef[F]] =
-    AtomicCell[F].of(Map.empty[String, EventQueue[F]])
-
   def getQueue(key: String): F[Option[EventQueue[F]]] =
-    mapRefContext.flatMap(ref => ref.get.map(x => x.get(key)))
+    queueMap.get.map(x => x.get(key))
 
   def routes(wsb: WebSocketBuilder2[F]): HttpRoutes[F] =
     HttpRoutes.of[F] {
@@ -52,22 +50,25 @@ class BlazeWS[F[_]: LoggerFactory](using async: Async[F])()
 
       case GET -> Root / "list-channels" =>
         for {
-          mapRef       <- mapRefContext
-          jsonChannels <- mapRef.get.map(_.keys.toSeq.asJson)
-          resp         <- Ok(jsonChannels)
+          qm <- queueMap.get
+          _ <- logger.info(
+            s"Listing channels, current queueMap keys: ${qm.keys.toString()}"
+          )
+          resp <- Ok(qm.keys.toSeq.asJson)
         } yield resp
 
       case GET -> Root / "create" / channel =>
         for {
+          _          <- logger.info(s"Creating channel: ${channel}")
           maybeQueue <- getQueue(channel)
-          mapRef     <- mapRefContext
           existed <- maybeQueue match
             case None =>
-              Queue
-                .unbounded[F, Option[OutEvent]]
-                .map(queue => mapRef.update(_.updated(channel, queue)))
-                .map(_ => false)
+              for {
+                queue <- Queue.unbounded[F, Option[OutEvent]]
+                _     <- queueMap.update(_ + (channel -> queue))
+              } yield false
             case Some(queue) => async.pure(true)
+          _ <- logger.info(s"Creating channel: ${channel} existed: ${existed}")
           resp <- existed match
             case false =>
               Ok(
@@ -96,7 +97,7 @@ class BlazeWS[F[_]: LoggerFactory](using async: Async[F])()
           _          <- logger.info(s"Querying channel ${channel}")
           maybeQueue <- getQueue(channel)
           _ <- logger.info(
-            s"Deleting channel: ${channel} existed: ${maybeQueue.nonEmpty}"
+            s"Deleting channel: ${channel} in queueMap=${maybeQueue.nonEmpty}"
           )
           resp <- maybeQueue match
             case None =>
@@ -125,9 +126,8 @@ class BlazeWS[F[_]: LoggerFactory](using async: Async[F])()
         for {
           _          <- logger.info(s"Deleting channel: ${channel}")
           maybeQueue <- getQueue(channel)
-          mapRef     <- mapRefContext
           _ <- logger.info(
-            s"Deleting channel: ${channel} existed: ${maybeQueue.nonEmpty}"
+            s"Deleting channel: ${channel} in queueMap=${maybeQueue.nonEmpty}"
           )
           resp <- maybeQueue match
             case None =>
@@ -141,7 +141,7 @@ class BlazeWS[F[_]: LoggerFactory](using async: Async[F])()
                 )
               )
             case Some(queue) =>
-              mapRef.update(_ - channel) *> Ok(
+              queueMap.update(_ - channel) *> Ok(
                 JsonObject(
                   "channel" -> Json.fromString(channel),
                   "deleted" -> Json.True,
@@ -223,6 +223,8 @@ class BlazeWS[F[_]: LoggerFactory](using async: Async[F])()
 }
 
 object BlazeWS {
-  def apply[F[_]: Async: LoggerFactory](): BlazeWS[F] =
-    new BlazeWS[F]()
+  def apply[F[_]: Async: LoggerFactory](
+      queueMapRef: QueueMapRef[F]
+  ): BlazeWS[F] =
+    new BlazeWS[F](queueMapRef)
 }
