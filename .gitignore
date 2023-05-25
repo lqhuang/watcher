@@ -19,3 +19,10 @@ project/project
 # stainless
 stainless/
 project/lib/sbt-stainless.jar
+
+# Python
+.venv
+__pycache__/
+*.py[cod]
+mypy_cache/
+.pytest_cache/
