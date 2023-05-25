@@ -40,6 +40,7 @@ val dependencies = Seq(
   "io.circe"      %% "circe-core"          % circeVersion,
   "io.circe"      %% "circe-generic"       % circeVersion,
   "io.circe"      %% "circe-parser"        % circeVersion,
+  "ch.qos.logback" % "logback-classic"     % "1.4.4",
   // "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % tapirVersion,
   // "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
   // "com.softwaremill.sttp.tapir" %% "tapir-asyncapi-docs"     % tapirVersion,
@@ -72,7 +73,7 @@ lazy val rootProject = (project in file("."))
       organization    := "io.lqhuang",
       headerLicense   := Some(headerLic),
       headerEmptyLine := false,
-      scalaVersion    := "3.2.1",
+      scalaVersion    := "3.3.0",
       libraryDependencies ++= dependencies,
       Compile / mainClass := Some("io.lqhuang.watcher.Main"),
       /**

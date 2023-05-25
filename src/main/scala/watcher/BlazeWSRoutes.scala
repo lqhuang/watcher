@@ -10,11 +10,13 @@ import scala.concurrent.duration.*
 
 import cats.syntax.all.*
 import cats.effect.Async
-import cats.effect.kernel.Ref
-import cats.effect.std.Queue
+import cats.effect.std.{AtomicCell, Queue}
 import fs2.{Pipe, Stream}
 import fs2.concurrent.Topic
+
 import io.circe.syntax.*
+import io.circe.Json
+import io.circe.JsonObject
 
 import org.http4s.dsl.Http4sDsl
 import org.http4s.implicits.*
@@ -38,7 +40,7 @@ class BlazeWS[F[_]: LoggerFactory](using async: Async[F])()
   val logger = LoggerFactory[F].getLogger
 
   val mapRefContext: F[QueueMapRef[F]] =
-    Ref[F].of(Map.empty[String, EventQueue[F]])
+    AtomicCell[F].of(Map.empty[String, EventQueue[F]])
 
   def getQueue(key: String): F[Option[EventQueue[F]]] =
     mapRefContext.flatMap(ref => ref.get.map(x => x.get(key)))
@@ -46,7 +48,7 @@ class BlazeWS[F[_]: LoggerFactory](using async: Async[F])()
   def routes(wsb: WebSocketBuilder2[F]): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case GET -> Root =>
-        Ok("You got me :)")
+        Ok(JsonObject("msg" -> Json.fromString("You got me :)")))
 
       case GET -> Root / "list-channels" =>
         for {
@@ -69,39 +71,83 @@ class BlazeWS[F[_]: LoggerFactory](using async: Async[F])()
           resp <- existed match
             case false =>
               Ok(
-                WatcherResponse(
-                  s"Successfully created channel ${channel}"
+                JsonObject(
+                  "channel" -> Json.fromString(channel),
+                  "created" -> Json.True,
+                  "msg" -> Json.fromString(
+                    s"Successfully created channel ${channel}"
+                  )
                 )
               )
             case true =>
               Ok(
-                WatcherResponse(
-                  s"Channel ${channel} already exists"
+                JsonObject(
+                  "channel" -> Json.fromString(channel),
+                  "created" -> Json.False,
+                  "msg" -> Json.fromString(
+                    s"Channel ${channel} already exists"
+                  )
                 )
               )
         } yield resp
 
       case GET -> Root / "status" / channel =>
         for {
+          _          <- logger.info(s"Querying channel ${channel}")
           maybeQueue <- getQueue(channel)
-          resp       <- Ok(s"Successfully send a GET request to ${channel}")
+          _ <- logger.info(
+            s"Deleting channel: ${channel} existed: ${maybeQueue.nonEmpty}"
+          )
+          resp <- maybeQueue match
+            case None =>
+              Ok(
+                JsonObject(
+                  "channel" -> Json.fromString(channel),
+                  "status"  -> Json.False,
+                  "msg" -> Json.fromString(
+                    s"Channel ${channel} not found. Please create it first"
+                  )
+                )
+              )
+            case Some(_) =>
+              Ok(
+                JsonObject(
+                  "channel" -> Json.fromString(channel),
+                  "status"  -> Json.True,
+                  "msg" -> Json.fromString(
+                    s"Channel ${channel} is alive"
+                  )
+                )
+              )
         } yield resp
 
       case GET -> Root / "delete" / channel =>
         for {
+          _          <- logger.info(s"Deleting channel: ${channel}")
           maybeQueue <- getQueue(channel)
           mapRef     <- mapRefContext
+          _ <- logger.info(
+            s"Deleting channel: ${channel} existed: ${maybeQueue.nonEmpty}"
+          )
           resp <- maybeQueue match
             case None =>
               NotFound(
-                WatcherResponse(
-                  s"Channel ${channel} not found. Please create it first"
+                JsonObject(
+                  "channel" -> Json.fromString(channel),
+                  "deleted" -> Json.False,
+                  "msg" -> Json.fromString(
+                    s"Channel ${channel} not found. Please create it first"
+                  )
                 )
               )
             case Some(queue) =>
               mapRef.update(_ - channel) *> Ok(
-                WatcherResponse(
-                  s"Successfully deleted channel ${channel}"
+                JsonObject(
+                  "channel" -> Json.fromString(channel),
+                  "deleted" -> Json.True,
+                  "msg" -> Json.fromString(
+                    s"Successfully deleted channel ${channel}"
+                  )
                 )
               )
         } yield resp
@@ -113,15 +159,23 @@ class BlazeWS[F[_]: LoggerFactory](using async: Async[F])()
           resp <- maybeQueue match
             case None =>
               NotFound(
-                WatcherResponse(
-                  s"Channel ${channel} not found. Please create it first"
+                JsonObject(
+                  "channel" -> Json.fromString(channel),
+                  "send"    -> Json.False,
+                  "msg" -> Json.fromString(
+                    s"Channel ${channel} not found. Please create it first"
+                  )
                 )
               )
             case Some(queue) => {
               val out = in.toOutEvent
               queue.offer(Some(out)) *> Ok(
-                WatcherResponse(
-                  s"Successfully send a GET request to ${channel}"
+                JsonObject(
+                  "channel" -> Json.fromString(channel),
+                  "send"    -> Json.True,
+                  "msg" -> Json.fromString(
+                    s"Successfully send a GET request to ${channel}"
+                  )
                 )
               )
             }

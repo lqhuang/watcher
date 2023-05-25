@@ -7,10 +7,10 @@ package io.lqhuang
 package watcher
 package types
 
-import cats.effect.kernel.Ref
-import cats.effect.std.Queue
+// import cats.effect.kernel.Ref
+import cats.effect.std.{AtomicCell, Queue}
 
 import data.*
 
 type EventQueue[F[_]]  = Queue[F, Option[OutEvent]]
-type QueueMapRef[F[_]] = Ref[F, Map[String, EventQueue[F]]]
+type QueueMapRef[F[_]] = AtomicCell[F, Map[String, EventQueue[F]]]
