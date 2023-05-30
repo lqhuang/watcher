@@ -40,7 +40,7 @@ val dependencies = Seq(
   "io.circe"      %% "circe-core"          % circeVersion,
   "io.circe"      %% "circe-generic"       % circeVersion,
   "io.circe"      %% "circe-parser"        % circeVersion,
-  "ch.qos.logback" % "logback-classic"     % "1.4.4",
+  "ch.qos.logback" % "logback-classic"     % "1.4.7",
   // "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % tapirVersion,
   // "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
   // "com.softwaremill.sttp.tapir" %% "tapir-asyncapi-docs"     % tapirVersion,
@@ -48,7 +48,7 @@ val dependencies = Seq(
   "org.http4s"          %% "http4s-blaze-client"        % blazeVersion % Test,
   "org.typelevel"       %% "cats-effect"                % ceVersion    % Test,
   "com.alejandrohdezma" %% "http4s-munit"               % "0.15.0"     % Test,
-  "com.dimafeng"        %% "testcontainers-scala-munit" % "0.40.15"    % Test,
+  "com.dimafeng"        %% "testcontainers-scala-munit" % "0.40.16"    % Test,
   // "org.typelevel"       %% "munit-cats-effect"   % "v2.0.0-M3"  % Test,
 )
 
