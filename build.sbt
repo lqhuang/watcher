@@ -10,8 +10,8 @@ val jsoniterVersion = "2.17.5"
 val munitVersion    = "0.7.29"
 // val tapirVersion    = "1.1.3"
 
-// Global / onChangedBuildSource := ReloadOnSourceChanges
-Compile / run / fork := true
+Global / onChangedBuildSource := ReloadOnSourceChanges
+Compile / run / fork          := true
 
 scalacOptions ++= Seq(
   // "-feature", // Emit warning and location for usages of features that should be imported explicitly.
@@ -89,6 +89,7 @@ lazy val rootProject = (project in file("."))
       // Universal
       Universal / name        := name.value,
       Universal / packageName := packageName.value,
+      // Universal / javaOptions ++= Seq("-Dlogback.level=info"),
       // Docker
       Docker / packageName                 := packageName.value,
       Docker / version                     := version.value,
