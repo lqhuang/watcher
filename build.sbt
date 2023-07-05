@@ -98,7 +98,11 @@ lazy val rootProject = (project in file("."))
       dockerBaseImage                      := "eclipse-temurin:17.0.5_8-jre",
       dockerExposedPorts                   := Seq(8080),
       dockerPermissionStrategy := DockerPermissionStrategy.CopyChown,
+      dockerBuildInit          := true,
       dockerRepository         := Some("ghcr.io"),
       dockerUsername           := Some("lqhuang"),
+      dockerLabels := Map(
+        "org.opencontainers.image.source" -> "https://github.com/lqhuang/watcher"
+      )
     )
   )
