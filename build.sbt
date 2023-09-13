@@ -73,7 +73,7 @@ lazy val rootProject = (project in file("."))
       organization    := "io.lqhuang",
       headerLicense   := Some(headerLic),
       headerEmptyLine := false,
-      scalaVersion    := "3.3.0",
+      scalaVersion    := "3.3.1",
       libraryDependencies ++= dependencies,
       Compile / mainClass := Some("io.lqhuang.watcher.Main"),
       /**
