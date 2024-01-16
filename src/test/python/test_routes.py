@@ -23,7 +23,7 @@ def random_string(length: int = 10) -> str:
 
 
 @asynccontextmanager
-async def auto_channel(client: AsyncClient, channel: str):
+async def auto_once_channel(client: AsyncClient, channel: str):
     # First create the channel
     resp = await client.get(f"/create/{channel}")
     assert resp.status_code == codes.OK
@@ -31,14 +31,14 @@ async def auto_channel(client: AsyncClient, channel: str):
     assert data["channel"] == channel
     assert data["created"] is True
 
-    yield
-
-    # Finally: delete the channel
-    resp = await client.get(f"/delete/{channel}")
-    assert resp.status_code == codes.OK
-    data = resp.json()
-    assert data["channel"] == channel
-    assert data["deleted"] is True
+    try:
+        yield
+    finally:
+        resp = await client.get(f"/delete/{channel}")
+        assert resp.status_code == codes.OK
+        data = resp.json()
+        assert data["channel"] == channel
+        assert data["deleted"] is True
 
 
 async def handler(websocket, channel: str):
@@ -160,7 +160,7 @@ async def test_channel_does_not_existed(client: AsyncClient):
 async def test_no_outdated_messages(client: AsyncClient):
     channel = random_string()
 
-    async with auto_channel(client, channel := random_string()):
+    async with auto_once_channel(client, channel := random_string()):
         for _ in range(10):
             msg = {
                 "id": randint(0, 1000),

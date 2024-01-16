@@ -12,5 +12,10 @@ PYTEST ?= pytest
 venv:
 	${PYTHON} -m venv .venv --upgrade-deps
 
-pytest:
+exec-scala-test:
+	sbt +test
+
+exec-py-test:
 	${PYTEST} src/test/python
+
+test: exec-scala-test exec-py-test
