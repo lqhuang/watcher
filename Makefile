@@ -1,8 +1,11 @@
+-include extra.mk
 
 # ---- Scala ----
-
 bloopInstall:
 	sbt bloopInstall
+
+install-native-image:
+	gu install native-image
 
 # ---- Python ----
 PYTHON ?= python3
