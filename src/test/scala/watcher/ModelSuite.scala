@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import java.time.Instant
-import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit.MILLIS
 
 import io.circe.{Encoder, Json, JsonObject}
@@ -37,7 +36,7 @@ class ModelSuite extends FunSuite {
     val inEvent = InEvent(
       13,
       "test-event",
-      Instant.ofEpochMilli(1672905895697L).nn,
+      Instant.ofEpochMilli(1672905895697L),
       payload = Json.fromJsonObject(
         JsonObject(
           "datetime"   -> Json.fromString("2023-01-05T08:04:55.697+00:00"),
@@ -51,7 +50,7 @@ class ModelSuite extends FunSuite {
     )
 
     val result        = decode[InEvent](rawJson)
-    val parsedInEvent = result.getOrElse(null)
+    val parsedInEvent = result.getOrElse(None)
 
     assert(result.isRight)
     assertEquals(parsedInEvent, inEvent)
@@ -77,7 +76,7 @@ class ModelSuite extends FunSuite {
     val inEvent = InEvent(
       13,
       "test-event",
-      Instant.ofEpochMilli(1672905895697L).nn,
+      Instant.ofEpochMilli(1672905895697L),
       payload = Json.fromJsonObject(
         JsonObject(
           "datetime"   -> Json.fromString("2023-01-05T08:04:55.697Z"),
@@ -96,8 +95,8 @@ class ModelSuite extends FunSuite {
   }
 
   test("time resolution in OutEvent json") {
-    val nanosInstant = Instant.now().nn
-    val eventTime    = Instant.ofEpochMilli(1672905895697L).nn
+    val nanosInstant = Instant.now()
+    val eventTime    = Instant.ofEpochMilli(1672905895697L)
     val outEvent = OutEvent(
       0,
       "test-out-event",
@@ -107,17 +106,23 @@ class ModelSuite extends FunSuite {
     )
 
     val decodedOutEvent =
-      decode[OutEvent](outEvent.asJson.noSpaces).getOrElse(null).nn
+      decode[OutEvent](outEvent.asJson.noSpaces).toOption
 
-    assertEquals(eventTime, decodedOutEvent.eventTime)
-    assertEquals(nanosInstant.truncatedTo(MILLIS), decodedOutEvent.arrivalTime)
+    assertEquals(
+      eventTime,
+      decodedOutEvent.map(_.eventTime).getOrElse(Instant.now())
+    )
+    assertEquals(
+      nanosInstant.truncatedTo(MILLIS),
+      decodedOutEvent.map(_.arrivalTime).getOrElse(Instant.now())
+    )
   }
 
   test("test codec for Instant") {
     import io.lqhuang.watcher.data.given Encoder[Instant]
 
-    val t1    = Instant.ofEpochMilli(1672905895697L).nn
-    val tNano = Instant.now().nn
+    val t1    = Instant.ofEpochMilli(1672905895697L)
+    val tNano = Instant.now()
 
     assertEquals("2023-01-05T08:04:55.697Z", t1.asJson.asString.get)
     assertEquals(

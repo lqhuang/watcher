@@ -18,8 +18,8 @@ scalacOptions ++= Seq(
   // "-unchecked", // Enable additional warnings where generated code depends on assumptions.
   // "-language:strictEquality",
   "-explain", // Explain errors in more detail.
-  "-Yexplicit-nulls",
   "-Ysafe-init",
+  // "-Yexplicit-nulls",
   // "-Ymacro-annotations",
   // "-Xcheckinit", // Wrap field accessors to throw an exception on uninitialized access.
   // "-Ywarn-dead-code", // Warn when dead code is identified.

@@ -24,27 +24,26 @@ import io.circe.syntax.*
 
 given Encoder[Instant] =
   Encoder.encodeString.contramap[Instant](t =>
-    ISO_OFFSET_DATE_TIME.nn
+    ISO_OFFSET_DATE_TIME
       .format(
-        t.nn.truncatedTo(MILLIS).nn.atOffset(ZoneOffset.UTC)
+        t.truncatedTo(MILLIS).atOffset(ZoneOffset.UTC)
       )
-      .nn
   )
 
 sealed trait Input
 final case class InText(value: String) extends Input
 final case class InEvent(
-    id: Int,
-    name: String,
-    eventTime: Instant,
-    payload: Json
+  id: Int,
+  name: String,
+  eventTime: Instant,
+  payload: Json
 ) extends Input
   derives Codec.AsObject {
   def toOutEvent: OutEvent = OutEvent(
     id,
     name,
     eventTime,
-    Instant.now().nn,
+    Instant.now(),
     payload
   )
 }
@@ -52,18 +51,18 @@ final case class InEvent(
 sealed trait Output
 final case class OutText(value: String) extends Output
 final case class OutEvent(
-    id: Int,
-    name: String,
-    eventTime: Instant,
-    arrivalTime: Instant,
-    payload: Json,
+  id: Int,
+  name: String,
+  eventTime: Instant,
+  arrivalTime: Instant,
+  payload: Json,
 ) extends Output
   derives Codec.AsObject
 
 case class WatcherResponse(
-    msg: String
+  msg: String
 ) derives Codec.AsObject
 
 case class ChannelList(
-    channels: List[String]
+  channels: List[String]
 ) derives Codec.AsObject

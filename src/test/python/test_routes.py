@@ -2,21 +2,50 @@ from __future__ import annotations
 
 import asyncio
 from contextlib import asynccontextmanager
-from random import choices
+from datetime import UTC, datetime
+from random import choices, randint
 from string import ascii_letters, digits
 
 import pytest
 import pytest_asyncio
+import websockets
 from httpx import AsyncClient, Response, codes
 
 SAMPLES = ascii_letters + digits + "-_"
 
 HOST = "localhost"
 PORT = 8080
+URL = f"{HOST}:{PORT}"
 
 
 def random_string(length: int = 10) -> str:
     return "".join(choices(SAMPLES, k=length))
+
+
+@asynccontextmanager
+async def auto_channel(client: AsyncClient, channel: str):
+    # First create the channel
+    resp = await client.get(f"/create/{channel}")
+    assert resp.status_code == codes.OK
+    data = resp.json()
+    assert data["channel"] == channel
+    assert data["created"] is True
+
+    yield
+
+    # Finally: delete the channel
+    resp = await client.get(f"/delete/{channel}")
+    assert resp.status_code == codes.OK
+    data = resp.json()
+    assert data["channel"] == channel
+    assert data["deleted"] is True
+
+
+async def handler(websocket, channel: str):
+    await websocket.accept()
+    while True:
+        data = await websocket.receive_text()
+        await websocket.send_text(data)
 
 
 @pytest_asyncio.fixture
@@ -127,33 +156,22 @@ async def test_channel_does_not_existed(client: AsyncClient):
     assert data["status"] is False
 
 
-@asynccontextmanager
-async def auto_channel(client: AsyncClient, channel: str):
-    # First create the channel
-    resp = await client.get(f"/create/{channel}")
-    assert resp.status_code == codes.OK
-    data = resp.json()
-    assert data["channel"] == channel
-    assert data["created"] is True
-
-    yield
-
-    # Finally: delete the channel
-    resp = await client.get(f"/delete/{channel}")
-    assert resp.status_code == codes.OK
-    data = resp.json()
-    assert data["channel"] == channel
-    assert data["deleted"] is True
-
-
-async def handler(websocket, channel: str):
-    await websocket.accept()
-    while True:
-        data = await websocket.receive_text()
-        await websocket.send_text(data)
-
-
 @pytest.mark.asyncio
-async def test_channel_publish_and_consume(client: AsyncClient):
+async def test_no_outdated_messages(client: AsyncClient):
+    channel = random_string()
+
     async with auto_channel(client, channel := random_string()):
-        ...
+        for _ in range(10):
+            msg = {
+                "id": randint(0, 1000),
+                "name": f"event-name-{random_string(3)}",
+                "eventTime": datetime.now(UTC).isoformat(),
+                "payload": {},
+            }
+            resp = await client.post(f"/send/{channel}", json=msg)
+            resp.raise_for_status()
+
+        async with websockets.connect(f"ws://{URL}/ws/{channel}") as ws:  # type: ignore[attr-defined]
+            with pytest.raises(asyncio.TimeoutError):
+                async with asyncio.timeout(0.5):
+                    _ = await ws.recv()  # type: ignore[attr-defined]
