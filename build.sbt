@@ -31,16 +31,19 @@ ThisBuild / semanticdbEnabled := true
 ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.1.5"
 
 val dependencies = Seq(
-  // "org.typelevel" %% "cats-effect-cps"     % cpsVersion,
   "org.typelevel" %% "cats-effect-std"     % ceVersion,
-  "org.typelevel" %% "log4cats-slf4j"      % log4catsVersion,
   "org.http4s"    %% "http4s-dsl"          % http4sVersion,
   "org.http4s"    %% "http4s-blaze-server" % blazeVersion,
   "org.http4s"    %% "http4s-circe"        % http4sVersion,
   "io.circe"      %% "circe-core"          % circeVersion,
   "io.circe"      %% "circe-generic"       % circeVersion,
   "io.circe"      %% "circe-parser"        % circeVersion,
+  "org.typelevel" %% "log4cats-core"       % log4catsVersion,
+  "org.typelevel" %% "log4cats-slf4j"      % log4catsVersion,
   "ch.qos.logback" % "logback-classic"     % "1.4.14",
+  // "org.typelevel" %%% "log4cats-js-console" % log4catsVersion,
+  // "org.typelevel" %% "cats-effect-cps"     % cpsVersion,
+  // "org.typelevel" %% "cats-time" % "0.5.1",
   // "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % tapirVersion,
   // "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
   // "com.softwaremill.sttp.tapir" %% "tapir-asyncapi-docs"     % tapirVersion,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from random import choices, randint
@@ -60,7 +61,7 @@ async def test_get_routes(client: AsyncClient):
     assert resp.status_code == codes.OK
 
     ret = resp.json()
-    assert ret["msg"] == "You got me :)"
+    assert ret["info"] == "You got me :)"
 
 
 @pytest.mark.asyncio
@@ -157,6 +158,40 @@ async def test_channel_does_not_existed(client: AsyncClient):
 
 
 @pytest.mark.asyncio
+async def test_single_publisher_multiple_consumer(client: AsyncClient):
+    channel = random_string()
+
+    msgs = [
+        {
+            "id": randint(0, 1000),
+            "name": f"event-{i}",
+            "eventTime": datetime.now(UTC).isoformat(),
+            "payload": {},
+        }
+        for i in range(10)
+    ]
+    async with auto_once_channel(client, channel := random_string()):
+
+        async def send_job():
+            await asyncio.sleep(0.1)  # wait ws client to connect
+            for msg in msgs:
+                resp = await client.post(f"/send/{channel}", json=msg)
+                resp.raise_for_status()
+
+        async def recv_job(n: int):
+            async with websockets.connect(f"ws://{URL}/ws/{channel}") as ws:  # type: ignore[attr-defined]
+                for msg in msgs:
+                    resp = await ws.recv()  # type: ignore[attr-defined]
+                    ret: dict = json.loads(resp)
+                    ret.pop("arrivalTime")
+                    assert ret["id"] == msg["id"]
+                    assert ret["name"] == msg["name"]
+                    assert ret["payload"] == msg["payload"]
+
+        await asyncio.gather(send_job(), recv_job(0), recv_job(1), recv_job(2))
+
+
+@pytest.mark.asyncio
 async def test_no_outdated_messages(client: AsyncClient):
     channel = random_string()
 
@@ -173,5 +208,5 @@ async def test_no_outdated_messages(client: AsyncClient):
 
         async with websockets.connect(f"ws://{URL}/ws/{channel}") as ws:  # type: ignore[attr-defined]
             with pytest.raises(asyncio.TimeoutError):
-                async with asyncio.timeout(0.5):
+                async with asyncio.timeout(0.2):
                     _ = await ws.recv()  # type: ignore[attr-defined]

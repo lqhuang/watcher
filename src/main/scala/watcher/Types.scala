@@ -7,10 +7,11 @@ package io.lqhuang
 package watcher
 package types
 
-// import cats.effect.kernel.Ref
-import cats.effect.std.{AtomicCell, Queue}
+import cats.effect.std.AtomicCell
+import fs2.concurrent.Topic
 
 import data.*
 
-type EventQueue[F[_]]  = Queue[F, Option[OutEvent]]
-type QueueMapRef[F[_]] = AtomicCell[F, Map[String, EventQueue[F]]]
+type Message           = Any
+type WTopic[F[_]]      = Topic[F, Option[Message]]
+type TopicMapRef[F[_]] = AtomicCell[F, Map[String, WTopic[F]]]

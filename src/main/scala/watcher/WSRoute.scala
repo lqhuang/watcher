@@ -8,8 +8,7 @@ package watcher
 
 import cats.syntax.all.*
 import cats.effect.Async
-import cats.effect.std.{AtomicCell, Queue}
-import fs2.{Pipe, Stream}
+import fs2.Pipe
 import fs2.concurrent.Topic
 
 import io.circe.Json
@@ -29,65 +28,44 @@ import org.http4s.HttpRoutes
 import org.typelevel.log4cats.LoggerFactory
 
 import data.*
-import types.{EventQueue, QueueMapRef}
+import types.{Message, TopicMapRef, WTopic}
 
 class WSRoute[F[_]: LoggerFactory](using async: Async[F])(
-  queueMap: QueueMapRef[F]
+  topicMap: TopicMapRef[F]
 ) extends Http4sDsl[F] {
 
-  val logger = LoggerFactory[F].getLogger
+  val logger = LoggerFactory[F].getLoggerFromName(getClass.getName())
 
-  def getQueue(key: String): F[Option[EventQueue[F]]] =
-    queueMap.get.map(x => x.get(key))
+  def createTopic(): F[WTopic[F]] = Topic[F, Option[Message]]
 
-  // def fireBackgroundConsumer(key: String): F[Unit] =
-  //   for {
-  //     maybeQueue <- getQueue(key)
-  //     _ <- maybeQueue match
-  //         case None =>
-  //           logger.info(s"Channel ${key} not found. Please create it first")
-  //         case Some(queue) => {
-  //           val nonStopConsumer = Stream
-  //             .fromQueueUnterminated(queue)
-  //             .evalMap {
-  //               case Some(msg) =>
-  //                 logger.info(s"Receving msg from Queue (${key}): ${msg}")
-  //               case None =>
-  //                 logger.info(s"Channel ${key} closed")
-  //             }
-  //             .compile
-  //             .drain
-
-  //           nonStopConsumer.start
-  //         }
-  //   } yield ()
+  def getTopic(key: String): F[Option[WTopic[F]]] =
+    topicMap.get.map(x => x.get(key))
 
   def routes(wsb: WebSocketBuilder2[F]): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case GET -> Root =>
-        Ok(JsonObject("msg" -> Json.fromString("You got me :)")))
+        Ok(JsonObject("info" -> Json.fromString("You got me :)")))
 
       case GET -> Root / "list-channels" =>
         for {
-          qm <- queueMap.get
+          tm <- topicMap.get
           _ <- logger.info(
-            s"Listing channels, current queueMap keys: ${qm.keys.toString()}"
+            s"Listing channels, current topicMap keys: ${tm.keys.toString()}"
           )
-          resp <- Ok(qm.keys.toSeq.asJson)
+          resp <- Ok(tm.keys.toSeq.asJson)
         } yield resp
 
       case GET -> Root / "create" / channel =>
         for {
           _          <- logger.info(s"Creating channel: ${channel}")
-          maybeQueue <- getQueue(channel)
-          existed <- maybeQueue match
+          maybeTopic <- getTopic(channel)
+          existed <- maybeTopic match
               case None =>
                 for {
-                  queue <- Queue.unbounded[F, Option[OutEvent]]
-                  _     <- queueMap.update(_ + (channel -> queue))
-                  // _     <- fireBackgroundConsumer(channel)
+                  topic <- createTopic()
+                  _     <- topicMap.update(_ + (channel -> topic))
                 } yield false
-              case Some(queue) => async.pure(true)
+              case Some(topic) => async.pure(true)
           _ <- logger.info(s"Creating channel: ${channel} existed: ${existed}")
           resp <- existed match
               case false =>
@@ -95,7 +73,7 @@ class WSRoute[F[_]: LoggerFactory](using async: Async[F])(
                   JsonObject(
                     "channel" -> Json.fromString(channel),
                     "created" -> Json.True,
-                    "msg" -> Json.fromString(
+                    "info" -> Json.fromString(
                       s"Successfully created channel ${channel}"
                     )
                   )
@@ -105,7 +83,7 @@ class WSRoute[F[_]: LoggerFactory](using async: Async[F])(
                   JsonObject(
                     "channel" -> Json.fromString(channel),
                     "created" -> Json.False,
-                    "msg" -> Json.fromString(
+                    "info" -> Json.fromString(
                       s"Channel ${channel} already exists"
                     )
                   )
@@ -115,17 +93,17 @@ class WSRoute[F[_]: LoggerFactory](using async: Async[F])(
       case GET -> Root / "status" / channel =>
         for {
           _          <- logger.info(s"Querying channel ${channel}")
-          maybeQueue <- getQueue(channel)
+          maybeTopic <- getTopic(channel)
           _ <- logger.info(
-            s"Deleting channel: ${channel} in queueMap=${maybeQueue.nonEmpty}"
+            s"Deleting channel: ${channel} in topicMap = ${maybeTopic.nonEmpty}"
           )
-          resp <- maybeQueue match
+          resp <- maybeTopic match
               case None =>
                 Ok(
                   JsonObject(
                     "channel" -> Json.fromString(channel),
                     "status"  -> Json.False,
-                    "msg" -> Json.fromString(
+                    "info" -> Json.fromString(
                       s"Channel ${channel} not found. Please create it first"
                     )
                   )
@@ -135,7 +113,7 @@ class WSRoute[F[_]: LoggerFactory](using async: Async[F])(
                   JsonObject(
                     "channel" -> Json.fromString(channel),
                     "status"  -> Json.True,
-                    "msg" -> Json.fromString(
+                    "info" -> Json.fromString(
                       s"Channel ${channel} is alive"
                     )
                   )
@@ -145,27 +123,27 @@ class WSRoute[F[_]: LoggerFactory](using async: Async[F])(
       case GET -> Root / "delete" / channel =>
         for {
           _          <- logger.info(s"Deleting channel: ${channel}")
-          maybeQueue <- getQueue(channel)
+          maybeTopic <- getTopic(channel)
           _ <- logger.info(
-            s"Deleting channel: ${channel} in queueMap=${maybeQueue.nonEmpty}"
+            s"Deleting channel: ${channel} in queueMap=${maybeTopic.nonEmpty}"
           )
-          resp <- maybeQueue match
+          resp <- maybeTopic match
               case None =>
                 NotFound(
                   JsonObject(
                     "channel" -> Json.fromString(channel),
                     "deleted" -> Json.False,
-                    "msg" -> Json.fromString(
+                    "info" -> Json.fromString(
                       s"Channel ${channel} not found. Please create it first"
                     )
                   )
                 )
               case Some(queue) =>
-                queueMap.update(_ - channel) *> Ok(
+                topicMap.update(_ - channel) *> Ok(
                   JsonObject(
                     "channel" -> Json.fromString(channel),
                     "deleted" -> Json.True,
-                    "msg" -> Json.fromString(
+                    "info" -> Json.fromString(
                       s"Successfully deleted channel ${channel}"
                     )
                   )
@@ -175,67 +153,76 @@ class WSRoute[F[_]: LoggerFactory](using async: Async[F])(
       case req @ POST -> Root / "send" / channel =>
         for {
           in         <- req.as[InEvent]
-          maybeQueue <- getQueue(channel)
-          resp <- maybeQueue match
+          maybeTopic <- getTopic(channel)
+          resp <- maybeTopic match
               case None =>
                 NotFound(
                   JsonObject(
                     "channel" -> Json.fromString(channel),
                     "send"    -> Json.False,
-                    "msg" -> Json.fromString(
+                    "info" -> Json.fromString(
                       s"Channel ${channel} not found. Please create it first"
                     )
                   )
                 )
-              case Some(queue) => {
+              case Some(topic) => {
                 val out = in.toOutEvent
-                queue.offer(Some(out)) *> Ok(
-                  JsonObject(
-                    "channel" -> Json.fromString(channel),
-                    "send"    -> Json.True,
-                    "msg" -> Json.fromString(
-                      s"Successfully send a GET request to ${channel}"
-                    )
+                topic
+                  .publish1(Some(out))
+                  .flatMap(pubed =>
+                    if pubed.isRight then
+                        logger.info(s"${pubed}") *>
+                          Ok(
+                            JsonObject(
+                              "channel" -> Json.fromString(channel),
+                              "send"    -> Json.True,
+                              "info" -> Json.fromString(
+                                s"Successfully send a MESSAGE to ${channel}"
+                              )
+                            )
+                          )
+                    else
+                        logger.error(s"${pubed}") *> NotFound(
+                          JsonObject(
+                            "channel" -> Json.fromString(channel),
+                            "send"    -> Json.False,
+                            "info" -> Json.fromString(
+                              s"Failed to send a MESSAGE to ${channel}"
+                            )
+                          )
+                        )
                   )
-                )
               }
         } yield resp
 
-      // // alive route
-      // case GET -> Root / "ws" => {
-      //   val toClient: Stream[F, WebSocketFrame] =
-      //     Stream
-      //       .awakeEvery[F](2.seconds)
-      //       .map(d => Text(s"Hello! ${d.toSeconds}"))
-      //   val fromClient: Pipe[F, WebSocketFrame, Unit] = _.evalMap {
-      //     case Text(s, _) => logger.info(s)
-      //     case Close(_)   => logger.info("Got CLOSE")
-      //     case f          => logger.info(s"Unknown type: $f")
-      //   }
-      //   wsb.build(toClient, fromClient)
-      // }
-
       case GET -> Root / "ws" / channel =>
-        getQueue(channel)
+        getTopic(channel)
           .flatMap {
             _ match
                 case None =>
                   NotFound(
-                    WatcherResponse(
-                      s"Channel ${channel} not found. Please create it first"
+                    JsonObject(
+                      "channel" -> Json.fromString(channel),
+                      "ws"      -> Json.False,
+                      "info" -> Json.fromString(
+                        s"Channel ${channel} not found. Please create it first"
+                      )
                     )
                   )
-                case Some(queue) => {
+                case Some(topic) => {
                   val fromClient: Pipe[F, WebSocketFrame, Unit] = _.evalMap {
                     case Text(s, _) =>
                       logger.info(s"[channel=$channel] WS Received: $s")
                     case _ => async.unit
                   }
                   val toClient =
-                    Stream
-                      .fromQueueUnterminated(queue)
-                      .map(_.asJson.noSpaces)
-                      .map(Text(_))
+                    topic.subscribeUnbounded.map {
+                      case Some(msg) =>
+                        msg match
+                            case e: OutEvent => Text(e.asJson.noSpaces)
+                            case _           => Close()
+                      case None => Close()
+                    }
                   wsb.build(toClient, fromClient)
                 }
           }
@@ -244,7 +231,7 @@ class WSRoute[F[_]: LoggerFactory](using async: Async[F])(
 
 object WSRoute {
   def apply[F[_]: Async: LoggerFactory](
-    queueMapRef: QueueMapRef[F]
+    topicMapRef: TopicMapRef[F]
   ): WSRoute[F] =
-    new WSRoute[F](queueMapRef)
+    new WSRoute[F](topicMapRef)
 }
