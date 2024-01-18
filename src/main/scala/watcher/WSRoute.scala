@@ -57,7 +57,6 @@ class WSRoute[F[_]: LoggerFactory](using async: Async[F])(
 
       case GET -> Root / "create" / channel =>
         for {
-          _          <- logger.info(s"Creating channel: ${channel}")
           maybeTopic <- getTopic(channel)
           existed <- maybeTopic match
               case None =>
@@ -66,7 +65,9 @@ class WSRoute[F[_]: LoggerFactory](using async: Async[F])(
                   _     <- topicMap.update(_ + (channel -> topic))
                 } yield false
               case Some(topic) => async.pure(true)
-          _ <- logger.info(s"Creating channel: ${channel} existed: ${existed}")
+          _ <- logger.info(
+            s"Creating channel: ${channel} existed=${existed}"
+          )
           resp <- existed match
               case false =>
                 Ok(
@@ -92,10 +93,9 @@ class WSRoute[F[_]: LoggerFactory](using async: Async[F])(
 
       case GET -> Root / "status" / channel =>
         for {
-          _          <- logger.info(s"Querying channel ${channel}")
           maybeTopic <- getTopic(channel)
           _ <- logger.info(
-            s"Deleting channel: ${channel} in topicMap = ${maybeTopic.nonEmpty}"
+            s"Querying channel: ${channel} existed=${maybeTopic.nonEmpty}"
           )
           resp <- maybeTopic match
               case None =>
@@ -122,10 +122,9 @@ class WSRoute[F[_]: LoggerFactory](using async: Async[F])(
 
       case GET -> Root / "delete" / channel =>
         for {
-          _          <- logger.info(s"Deleting channel: ${channel}")
           maybeTopic <- getTopic(channel)
           _ <- logger.info(
-            s"Deleting channel: ${channel} in queueMap=${maybeTopic.nonEmpty}"
+            s"Deleting channel: ${channel} existed=${maybeTopic.nonEmpty}"
           )
           resp <- maybeTopic match
               case None =>
@@ -171,18 +170,17 @@ class WSRoute[F[_]: LoggerFactory](using async: Async[F])(
                   .publish1(Some(out))
                   .flatMap(pubed =>
                     if pubed.isRight then
-                        logger.info(s"${pubed}") *>
-                          Ok(
-                            JsonObject(
-                              "channel" -> Json.fromString(channel),
-                              "send"    -> Json.True,
-                              "info" -> Json.fromString(
-                                s"Successfully send a MESSAGE to ${channel}"
-                              )
+                        Ok(
+                          JsonObject(
+                            "channel" -> Json.fromString(channel),
+                            "send"    -> Json.True,
+                            "info" -> Json.fromString(
+                              s"Successfully send a MESSAGE to ${channel}"
                             )
                           )
+                        )
                     else
-                        logger.error(s"${pubed}") *> NotFound(
+                        NotFound(
                           JsonObject(
                             "channel" -> Json.fromString(channel),
                             "send"    -> Json.False,
@@ -212,7 +210,7 @@ class WSRoute[F[_]: LoggerFactory](using async: Async[F])(
                 case Some(topic) => {
                   val fromClient: Pipe[F, WebSocketFrame, Unit] = _.evalMap {
                     case Text(s, _) =>
-                      logger.info(s"[channel=$channel] WS Received: $s")
+                      logger.debug(s"[channel=$channel] WS Received: $s")
                     case _ => async.unit
                   }
                   val toClient =

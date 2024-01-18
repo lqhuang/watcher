@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%-30(%d{yyyy-MM-dd'T'HH:mm:ss.SSS'Z',UTC} [%logger{32}][%highlight(%5level)]) %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!--
+  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+    <file>/var/log/app.log</file>
+    <append>true</append>
+
+    <encoder>
+      <pattern>%-4relative [%thread] %-5level %logger{10} - %msg%n</pattern>
+    </encoder>
+  </appender>
+  -->
+
+  <logger name="org.http4s" level="info" />
+
+  <root level="info">
+    <appender-ref ref="STDOUT" />
+  </root>
+</configuration>

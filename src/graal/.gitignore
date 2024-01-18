@@ -1,0 +1,6 @@
+# If you are building the image in a docker container, and you have any
+# resources that need to be available to the `native-image` command, such
+# as files passed to `-H:ResourceConfigurationFiles` or `-H:ReflectionConfigurationFiles`,
+# you can place these in your projects `src/graal` directory. Any files
+# in there will be made available to the `native-image` docker container
+# under the path `/opt/graalvm/stage/resources`.

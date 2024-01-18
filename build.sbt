@@ -70,36 +70,46 @@ lazy val rootProject = (project in file("."))
   .enablePlugins(GraalVMNativeImagePlugin)
   .settings(
     Seq(
-      name            := "watcher",
-      packageName     := "watcher",
-      version         := "0.1.4-SNAPSHOT",
-      organization    := "io.lqhuang",
-      headerLicense   := Some(headerLic),
-      headerEmptyLine := false,
-      scalaVersion    := "3.3.1",
+      name         := "watcher",
+      packageName  := "watcher",
+      version      := "0.1.4-SNAPSHOT",
+      maintainer   := "lqhuang@outlook.com",
+      organization := "io.lqhuang",
+      scalaVersion := "3.3.1",
       libraryDependencies ++= dependencies,
+      headerLicense       := Some(headerLic),
+      headerEmptyLine     := false,
       Compile / mainClass := Some("io.lqhuang.watcher.Main"),
       /**
        * In order to generate launch scripts only for specified `mainClass`, you
        * will need to discard automatically found main classes:
        */
       // Compile / discoveredMainClasses := Seq(),
+      /**
+       * sbt-native-packager settings
+       */
+      // Universal
+      Universal / name        := name.value,
+      Universal / packageName := packageName.value,
+      Universal / javaOptions ++= Seq(
+        "-Dlogback.configurationFile=${app_home}/../conf/logback.xml",
+      ),
+      Universal / mappings += file("README.md") -> "README.md",
+      // GraalVM
       graalVMNativeImageOptions ++= Seq(
         "--static", // creates a statically linked executable that has no dependencies on external libraries
         "--no-fallback", // fail the build instead of generating fallback code when native image cannot resolve uses of reflection or other issues
         "--verbose",
       ),
-      // Universal
-      Universal / name        := name.value,
-      Universal / packageName := packageName.value,
-      // Universal / javaOptions ++= Seq("-Dlogback.level=info"),
       // Docker
       Docker / packageName                 := packageName.value,
       Docker / version                     := version.value,
       Docker / maintainer                  := "Lanqing Huang",
       Docker / defaultLinuxInstallLocation := "/app",
-      dockerBaseImage                      := "eclipse-temurin:17.0.5_8-jre",
-      dockerExposedPorts                   := Seq(8080),
+      Docker / daemonUser                  := "worker",
+      Docker / daemonUserUid               := Some("1000"),
+      dockerBaseImage          := "eclipse-temurin:21.0.1_12-jre-alpine",
+      dockerExposedPorts       := Seq(8080),
       dockerPermissionStrategy := DockerPermissionStrategy.CopyChown,
       dockerBuildInit          := true,
       dockerRepository         := Some("ghcr.io"),

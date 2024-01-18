@@ -50,7 +50,7 @@ class StreamBuilder[F[_]: Async: Console: LoggerFactory]:
         topicMap <- Stream.eval(
           AtomicCell[F].of(Map.empty[String, WTopic[F]])
         )
-        _ <- Stream.eval(logger.info("Starting watcher server"))
+        _ <- Stream.eval(logger.info("Starting watcher application"))
         _ <- {
           val server = BlazeServerBuilder[F]
             .bindHttp(port, host)
