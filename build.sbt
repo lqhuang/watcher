@@ -72,7 +72,7 @@ lazy val rootProject = (project in file("."))
     Seq(
       name         := "watcher",
       packageName  := "watcher",
-      version      := "0.1.4-SNAPSHOT",
+      version      := "0.1.5-SNAPSHOT",
       maintainer   := "lqhuang@outlook.com",
       organization := "io.lqhuang",
       scalaVersion := "3.3.1",
@@ -111,9 +111,9 @@ lazy val rootProject = (project in file("."))
       dockerBaseImage          := "eclipse-temurin:21.0.1_12-jre-alpine",
       dockerExposedPorts       := Seq(8080),
       dockerPermissionStrategy := DockerPermissionStrategy.CopyChown,
-      dockerBuildInit          := true,
-      dockerRepository         := Some("ghcr.io"),
-      dockerUsername           := Some("lqhuang"),
+      dockerBuildInit := false, // docker buildx has no `--init` flag (already enabled by default)
+      dockerRepository := Some("ghcr.io"),
+      dockerUsername   := Some("lqhuang"),
       dockerLabels := Map(
         "org.opencontainers.image.source" -> "https://github.com/lqhuang/watcher"
       )
