@@ -40,7 +40,7 @@ val dependencies = Seq(
   "io.circe"      %% "circe-parser"        % circeVersion,
   "org.typelevel" %% "log4cats-core"       % log4catsVersion,
   "org.typelevel" %% "log4cats-slf4j"      % log4catsVersion,
-  "ch.qos.logback" % "logback-classic"     % "1.5.3",
+  "ch.qos.logback" % "logback-classic"     % "1.5.4",
   // "org.typelevel" %%% "log4cats-js-console" % log4catsVersion,
   // "org.typelevel" %% "cats-effect-cps"     % cpsVersion,
   // "org.typelevel" %% "cats-time" % "0.5.1",
