@@ -1,5 +1,5 @@
 addSbtPlugin("org.scalameta"     % "sbt-scalafmt"        % "2.5.0")
-addSbtPlugin("ch.epfl.scala"     % "sbt-scalafix"        % "0.12.0")
+addSbtPlugin("ch.epfl.scala"     % "sbt-scalafix"        % "0.12.1")
 addSbtPlugin("ch.epfl.scala"     % "sbt-bloop"           % "1.5.17")
 addSbtPlugin("com.github.sbt"    % "sbt-native-packager" % "1.9.14")
 addSbtPlugin("org.http4s"        % "sbt-http4s-org"      % "0.17.0")
