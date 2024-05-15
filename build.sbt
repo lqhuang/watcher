@@ -1,6 +1,5 @@
 import com.typesafe.sbt.packager.docker.DockerPermissionStrategy
 
-// val cpsVersion      = "0.4.0"
 val ceVersion       = "3.5.4"
 val log4catsVersion = "2.7.0"
 val http4sVersion   = "0.23.27"
@@ -8,7 +7,6 @@ val blazeVersion    = "0.23.16"
 val circeVersion    = "0.14.7"
 val jsoniterVersion = "2.17.5"
 val munitVersion    = "0.7.29"
-// val tapirVersion    = "1.1.3"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 Compile / run / fork          := true
@@ -28,6 +26,8 @@ scalacOptions ++= Seq(
 
 ThisBuild / tlBaseVersion     := "0.1"
 ThisBuild / semanticdbEnabled := true
+ThisBuild / startYear         := Some(2024)
+ThisBuild / developers        := List(tlGitHubDev("lqhuang", "Lanqing Huang"))
 ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.1.5"
 
 val dependencies = Seq(
@@ -40,23 +40,19 @@ val dependencies = Seq(
   "io.circe"      %% "circe-parser"        % circeVersion,
   "org.typelevel" %% "log4cats-core"       % log4catsVersion,
   "org.typelevel" %% "log4cats-slf4j"      % log4catsVersion,
-  "ch.qos.logback" % "logback-classic"     % "1.5.6",
-  // "org.typelevel" %%% "log4cats-js-console" % log4catsVersion,
+  "com.outr"      %% "scribe"              % "3.13.5",
   // "org.typelevel" %% "cats-effect-cps"     % cpsVersion,
   // "org.typelevel" %% "cats-time" % "0.5.1",
-  // "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"     % tapirVersion,
-  // "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
-  // "com.softwaremill.sttp.tapir" %% "tapir-asyncapi-docs"     % tapirVersion,
   "org.scalameta"       %% "munit"                      % munitVersion % Test,
-  "org.http4s"          %% "http4s-blaze-client"        % blazeVersion % Test,
+  "org.typelevel"       %% "munit-cats-effect"          % "2.0.0-RC1"  % Test,
   "org.typelevel"       %% "cats-effect"                % ceVersion    % Test,
+  "org.http4s"          %% "http4s-blaze-client"        % blazeVersion % Test,
   "com.alejandrohdezma" %% "http4s-munit"               % "0.15.1"     % Test,
   "com.dimafeng"        %% "testcontainers-scala-munit" % "0.41.3"     % Test,
-  // "org.typelevel"       %% "munit-cats-effect"   % "v2.0.0-M3"  % Test,
 )
 
 val headerLic = HeaderLicense.ALv2(
-  "2023",
+  "2024",
   "Lanqing Huang",
   HeaderLicenseStyle.SpdxSyntax
 )

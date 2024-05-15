@@ -74,3 +74,13 @@ sbt Docker/publish
 
 **Warning**: Before executing `Docker/publish`, you need to login to container
 registry outside `sbt`.
+
+## Similar ideas
+
+- [softwaremill/elasticmq](https://github.com/softwaremill/elasticmq): In-memory
+  message queue with an Amazon SQS-compatible interface. Runs stand-alone or
+  embedded. <https://softwaremill.com/open-source/>
+- [centrifugal/centrifugo](https://github.com/centrifugal/centrifugo): Scalable
+  real-time messaging server in a language-agnostic way. Self-hosted alternative
+  to Pubnub, Pusher, Ably. Set up once and forever. <https://centrifugal.dev>
+  - yeah, finally, I found the right one. This is actually what I want to build.
