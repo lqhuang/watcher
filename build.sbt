@@ -47,7 +47,7 @@ val dependencies = Seq(
   "org.typelevel"       %% "munit-cats-effect"          % "2.0.0"      % Test,
   "org.typelevel"       %% "cats-effect"                % ceVersion    % Test,
   "org.http4s"          %% "http4s-blaze-client"        % blazeVersion % Test,
-  "com.alejandrohdezma" %% "http4s-munit"               % "0.15.1"     % Test,
+  "com.alejandrohdezma" %% "http4s-munit"               % "1.0.0"      % Test,
   "com.dimafeng"        %% "testcontainers-scala-munit" % "0.41.3"     % Test,
 )
 
