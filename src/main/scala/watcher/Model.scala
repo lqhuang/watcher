@@ -37,8 +37,7 @@ final case class InEvent(
   name: String,
   eventTime: Instant,
   payload: Json
-) extends Input
-  derives Codec.AsObject {
+) extends Input derives Codec.AsObject {
   def toOutEvent: OutEvent = OutEvent(
     id,
     name,
@@ -56,8 +55,7 @@ final case class OutEvent(
   eventTime: Instant,
   arrivalTime: Instant,
   payload: Json,
-) extends Output
-  derives Codec.AsObject
+) extends Output derives Codec.AsObject
 
 case class WatcherResponse(
   msg: String
