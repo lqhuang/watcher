@@ -28,7 +28,7 @@ ThisBuild / tlBaseVersion     := "0.1"
 ThisBuild / semanticdbEnabled := true
 ThisBuild / startYear         := Some(2024)
 ThisBuild / developers        := List(tlGitHubDev("lqhuang", "Lanqing Huang"))
-ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.1.6"
+ThisBuild / scalafixDependencies += "org.typelevel" %% "typelevel-scalafix" % "0.3.1"
 
 val dependencies = Seq(
   "org.typelevel" %% "cats-effect-std"     % ceVersion,
