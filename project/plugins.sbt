@@ -3,7 +3,7 @@ val sbtMdocVersion      = "2.5.3"
 
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.0")
 addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.12.1")
-addSbtPlugin("ch.epfl.scala" % "sbt-bloop"    % "1.5.18")
+addSbtPlugin("ch.epfl.scala" % "sbt-bloop"    % "1.6.0")
 
 addSbtPlugin("com.github.sbt"    % "sbt-native-packager" % "1.9.14")
 addSbtPlugin("de.heikoseeberger" % "sbt-header"          % "5.10.0")
