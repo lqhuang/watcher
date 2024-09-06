@@ -4,7 +4,7 @@ val ceVersion       = "3.5.4"
 val log4catsVersion = "2.7.0"
 val http4sVersion   = "0.23.27"
 val blazeVersion    = "0.23.16"
-val circeVersion    = "0.14.9"
+val circeVersion    = "0.14.10"
 val jsoniterVersion = "2.17.5"
 val munitVersion    = "1.0.1"
 
