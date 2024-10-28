@@ -1,6 +1,6 @@
 import com.typesafe.sbt.packager.docker.DockerPermissionStrategy
 
-val ceVersion       = "3.5.4"
+val ceVersion       = "3.5.5"
 val log4catsVersion = "2.7.0"
 val http4sVersion   = "0.23.29"
 val blazeVersion    = "0.23.16"
