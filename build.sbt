@@ -2,7 +2,7 @@ import com.typesafe.sbt.packager.docker.DockerPermissionStrategy
 
 val ceVersion       = "3.5.7"
 val log4catsVersion = "2.7.0"
-val http4sVersion   = "0.23.29"
+val http4sVersion   = "0.23.30"
 val blazeVersion    = "0.23.17"
 val circeVersion    = "0.14.10"
 val jsoniterVersion = "2.17.5"
