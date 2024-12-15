@@ -40,7 +40,7 @@ val dependencies = Seq(
   "io.circe"      %% "circe-parser"        % circeVersion,
   "org.typelevel" %% "log4cats-core"       % log4catsVersion,
   "org.typelevel" %% "log4cats-slf4j"      % log4catsVersion,
-  "com.outr"      %% "scribe"              % "3.15.2",
+  "com.outr"      %% "scribe"              % "3.15.3",
   // "org.typelevel" %% "cats-effect-cps"     % cpsVersion,
   // "org.typelevel" %% "cats-time" % "0.5.1",
   "org.scalameta"       %% "munit"                      % munitVersion % Test,
