@@ -6,7 +6,7 @@ val http4sVersion   = "0.23.30"
 val blazeVersion    = "0.23.17"
 val circeVersion    = "0.14.10"
 val jsoniterVersion = "2.17.5"
-val munitVersion    = "1.0.3"
+val munitVersion    = "1.0.4"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 Compile / run / fork          := true
