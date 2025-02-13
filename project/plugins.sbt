@@ -1,5 +1,5 @@
 val sbtTypelevelVersion = "0.7.5"
-val sbtMdocVersion      = "2.6.3"
+val sbtMdocVersion      = "2.6.4"
 
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.0")
 addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.13.0")
