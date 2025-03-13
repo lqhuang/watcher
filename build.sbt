@@ -48,7 +48,7 @@ val dependencies = Seq(
   "org.typelevel"       %% "cats-effect"                % ceVersion    % Test,
   "org.http4s"          %% "http4s-blaze-client"        % blazeVersion % Test,
   "com.alejandrohdezma" %% "http4s-munit"               % "1.1.0"      % Test,
-  "com.dimafeng"        %% "testcontainers-scala-munit" % "0.41.8"     % Test,
+  "com.dimafeng"        %% "testcontainers-scala-munit" % "0.43.0"     % Test,
 )
 
 val headerLic = HeaderLicense.ALv2(
