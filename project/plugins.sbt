@@ -2,7 +2,7 @@ val sbtTypelevelVersion = "0.7.5"
 val sbtMdocVersion      = "2.7.1"
 
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.0")
-addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.14.2")
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.14.3")
 addSbtPlugin("ch.epfl.scala" % "sbt-bloop"    % "2.0.10")
 
 addSbtPlugin("com.github.sbt"    % "sbt-native-packager" % "1.9.14")
